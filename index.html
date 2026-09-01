@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Moon Enterprises - Premier Talent Agency">
+  <title>Moon Enterprises | Talent Portfolio</title>
+  <link rel="icon" type="image/jpeg" href="assets/images/moon manager.jpeg">
+  <link rel="apple-touch-icon" href="assets/images/moon manager.jpeg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header" id="header">
+    <div class="container header-content">
+      <div class="brand">
+        <i class="fas fa-moon brand-icon"></i>
+        <span class="brand-name" data-i18n="brandName">Moon Enterprises</span>
+      </div>
+      <nav class="nav" id="nav">
+        <ul class="nav-list">
+          <li><a href="#leadership" class="nav-link" data-i18n="navLeadership">Leadership</a></li>
+          <li><a href="#models" class="nav-link" data-i18n="navModels">Our Talent</a></li>
+          <li><a href="#division-b" class="nav-link" data-i18n="navDivisionB">Division B</a></li>
+          <li><a href="#packages" class="nav-link" data-i18n="navPackages">Packages</a></li>
+          <li><a href="#reviews" class="nav-link" data-i18n="navReviews">Reviews</a></li>
+          <li><a href="news.html" class="nav-link" data-i18n="navNews">News</a></li>
+          <li><a href="#contact" class="nav-link" data-i18n="navContact">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="header-actions">
+        <button class="lang-toggle" id="langToggle" aria-label="Toggle Language">
+          <span class="lang-current" id="langCurrent">EN</span>
+          <i class="fas fa-globe lang-icon"></i>
+        </button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Menu" aria-expanded="false">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <div class="container hero-container">
+        <div class="hero-content">
+          <h1 class="hero-title" data-i18n="heroTitle">Premier Talent Agency</h1>
+          <p class="hero-subtitle" data-i18n="heroSubtitle">Connecting exceptional talent with world-class opportunities</p>
+          <a href="#models" class="btn btn-primary" data-i18n="heroCta">View Our Talent</a>
+        </div>
+        <div class="hero-image-wrapper">
+          <img src="assets/images/hero-banner.jpg" alt="Moon Enterprises Leadership" class="hero-image" loading="eager">
+        </div>
+      </div>
+    </section>
+
+    <section class="leadership" id="leadership">
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title" data-i18n="leadershipTitle">Leadership Team</h2>
+          <p class="section-subtitle" data-i18n="leadershipSubtitle">Meet the visionaries behind Moon Enterprises</p>
+        </header>
+        <div class="leadership-grid" id="leadershipGrid"></div>
+      </div>
+    </section>
+
+    <section class="models" id="models">
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title" data-i18n="modelsTitle">Our Talent</h2>
+          <p class="section-subtitle" data-i18n="modelsSubtitle">Discover our diverse roster of professional models</p>
+        </header>
+        <div class="models-grid" id="modelsGrid"></div>
+      </div>
+    </section>
+
+    <section class="contact" id="contact">
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title" data-i18n="contactTitle">Get In Touch</h2>
+          <p class="section-subtitle" data-i18n="contactSubtitle">Ready to book talent? Contact our manager directly</p>
+        </header>
+        <div class="contact-card">
+          <div class="contact-info">
+            <h3 class="contact-name" data-i18n="managerName">Moon (Muni)</h3>
+            <p class="contact-role" data-i18n="managerRole">Operations Manager & Lead Broker</p>
+            <div class="contact-details">
+              <a href="tel:+923147553161" class="contact-item">
+                <i class="fas fa-phone"></i>
+                <span>+92 314 755 3161</span>
+              </a>
+              <a href="https://wa.me/923147553161" target="_blank" class="contact-item whatsapp-link">
+                <i class="fab fa-whatsapp"></i>
+                <span data-i18n="whatsappChat">Chat on WhatsApp</span>
+              </a>
+            </div>
+          </div>
+          <div class="contact-stats">
+            <div class="stat">
+              <span class="stat-number">17</span>
+              <span class="stat-label" data-i18n="staffCount">Service Staff</span>
+            </div>
+            <div class="stat">
+              <span class="stat-number">10+</span>
+              <span class="stat-label" data-i18n="modelsCount">Models</span>
+            </div>
+            <div class="stat">
+              <span class="stat-number">300-12K</span>
+              <span class="stat-label" data-i18n="priceRange">PKR Range</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="division division-b" id="division-b">
+      <div class="container">
+        <header class="section-header">
+          <span class="division-badge" data-i18n="divisionBBadge">Division B</span>
+          <h2 class="section-title" data-i18n="divisionBTitle">Ali Hamza Division</h2>
+          <p class="section-subtitle" data-i18n="divisionBSubtitle">Commercial & Event Talent — Stage, Hosting, Ushering and More</p>
+        </header>
+        <div class="division-leadership" id="divisionBLeadership"></div>
+        <div class="models-grid models-grid--division-b" id="divisionBGrid"></div>
+      </div>
+    </section>
+
+    <section class="packages" id="packages">
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title" data-i18n="packagesTitle">Special Package Deals</h2>
+          <p class="section-subtitle" data-i18n="packagesSubtitle">Curated multi-talent bundles at exclusive discounted rates</p>
+        </header>
+        <div class="packages-grid" id="packagesGrid"></div>
+      </div>
+    </section>
+
+    <section class="reviews" id="reviews">
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title" data-i18n="reviewsTitle">Client Reviews</h2>
+          <p class="section-subtitle" data-i18n="reviewsSubtitle">Trusted by brands and event organizers across the country</p>
+        </header>
+        <div class="reviews-tabs" role="tablist">
+          <button class="review-tab active" data-tab="division_a" role="tab" aria-selected="true" data-i18n="divisionATab">Moon Division</button>
+          <button class="review-tab" data-tab="division_b" role="tab" aria-selected="false" data-i18n="divisionBTab">Ali Hamza Division</button>
+        </div>
+
+        <div class="reviews-panel" id="reviewsPanelA" data-panel="division_a" role="tabpanel">
+          <div class="reviews-summary" id="reviewsSummaryA"></div>
+          <div class="reviews-grid" id="reviewsGridA"></div>
+          <form class="review-form" id="reviewFormA" novalidate>
+            <h3 class="review-form-title" data-i18n="leaveReview">Leave a Review</h3>
+            <div class="form-row">
+              <label class="form-field">
+                <span data-i18n="formName">Your Name</span>
+                <input type="text" name="name" required maxlength="60" autocomplete="name">
+              </label>
+              <div class="form-field">
+                <span data-i18n="formRating">Your Rating</span>
+                <div class="star-input" role="radiogroup" aria-label="Rating">
+                  <button type="button" class="star-btn" data-value="1" aria-label="1 star"><i class="far fa-star"></i></button>
+                  <button type="button" class="star-btn" data-value="2" aria-label="2 stars"><i class="far fa-star"></i></button>
+                  <button type="button" class="star-btn" data-value="3" aria-label="3 stars"><i class="far fa-star"></i></button>
+                  <button type="button" class="star-btn" data-value="4" aria-label="4 stars"><i class="far fa-star"></i></button>
+                  <button type="button" class="star-btn" data-value="5" aria-label="5 stars"><i class="far fa-star"></i></button>
+                </div>
+              </div>
+            </div>
+            <label class="form-field">
+              <span data-i18n="formComment">Your Review</span>
+              <textarea name="comment" required maxlength="500" rows="3"></textarea>
+            </label>
+            <button type="submit" class="btn btn-primary" data-i18n="formSubmit">Submit Review</button>
+            <p class="form-status" id="reviewFormAStatus" role="status"></p>
+          </form>
+        </div>
+
+        <div class="reviews-panel hidden" id="reviewsPanelB" data-panel="division_b" role="tabpanel" hidden>
+          <div class="reviews-summary" id="reviewsSummaryB"></div>
+          <div class="reviews-grid" id="reviewsGridB"></div>
+          <form class="review-form" id="reviewFormB" novalidate>
+            <h3 class="review-form-title" data-i18n="leaveReview">Leave a Review</h3>
+            <div class="form-row">
+              <label class="form-field">
+                <span data-i18n="formName">Your Name</span>
+                <input type="text" name="name" required maxlength="60" autocomplete="name">
+              </label>
+              <div class="form-field">
+                <span data-i18n="formRating">Your Rating</span>
+                <div class="star-input" role="radiogroup" aria-label="Rating">
+                  <button type="button" class="star-btn" data-value="1" aria-label="1 star"><i class="far fa-star"></i></button>
+                  <button type="button" class="star-btn" data-value="2" aria-label="2 stars"><i class="far fa-star"></i></button>
+                  <button type="button" class="star-btn" data-value="3" aria-label="3 stars"><i class="far fa-star"></i></button>
+                  <button type="button" class="star-btn" data-value="4" aria-label="4 stars"><i class="far fa-star"></i></button>
+                  <button type="button" class="star-btn" data-value="5" aria-label="5 stars"><i class="far fa-star"></i></button>
+                </div>
+              </div>
+            </div>
+            <label class="form-field">
+              <span data-i18n="formComment">Your Review</span>
+              <textarea name="comment" required maxlength="500" rows="3"></textarea>
+            </label>
+            <button type="submit" class="btn btn-primary" data-i18n="formSubmit">Submit Review</button>
+            <p class="form-status" id="reviewFormBStatus" role="status"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" id="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <i class="fas fa-moon"></i>
+          <span>Moon Enterprises</span>
+        </div>
+        <p class="footer-tagline" data-i18n="footerTagline">Empowering talent, delivering excellence</p>
+        <p class="footer-copyright" data-i18n="footerCopyright">&copy; 2026 Moon Enterprises. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+
+  <div class="modal" id="modelModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true" hidden>
+    <div class="modal-backdrop" data-modal-close></div>
+    <div class="modal-dialog" role="document">
+      <button class="modal-close" type="button" aria-label="Close" data-modal-close>
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="bookingModal" role="dialog" aria-modal="true" aria-labelledby="bookingTitle" aria-hidden="true" hidden>
+    <div class="modal-backdrop" data-booking-close></div>
+    <div class="modal-dialog booking-dialog" role="document">
+      <button class="modal-close" type="button" aria-label="Close" data-booking-close>
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="modal-body">
+        <div class="booking-header">
+          <span class="booking-badge" id="bookingBadge"><i class="fab fa-whatsapp"></i> Direct to Manager</span>
+          <h2 class="modal-name" id="bookingTitle">Book Your Session</h2>
+          <p class="booking-sub">Fill in your details — we'll pre-fill your WhatsApp message and notify the right manager instantly.</p>
+        </div>
+        <form class="booking-form" id="bookingForm" novalidate>
+          <div class="booking-grid">
+            <label class="form-field">
+              <span><i class="fas fa-user"></i> Client Name *</span>
+              <input type="text" name="clientName" required maxlength="60" autocomplete="name" placeholder="e.g. Sara Khan">
+            </label>
+            <label class="form-field">
+              <span><i class="fas fa-phone"></i> Phone Number *</span>
+              <input type="tel" name="clientPhone" required maxlength="20" autocomplete="tel" placeholder="+92 300 1234567" pattern="[0-9+\-\s()]{7,20}">
+            </label>
+            <label class="form-field">
+              <span><i class="fas fa-calendar"></i> Event Date *</span>
+              <input type="date" name="eventDate" required>
+            </label>
+            <label class="form-field">
+              <span><i class="fas fa-clock"></i> Event Time *</span>
+              <input type="time" name="eventTime" required>
+            </label>
+            <label class="form-field booking-full">
+              <span><i class="fas fa-star"></i> Selected Talent</span>
+              <input type="text" name="modelName" id="bookingModelName" readonly>
+            </label>
+            <label class="form-field booking-full">
+              <span><i class="fas fa-comment-dots"></i> Additional Notes (optional)</span>
+              <textarea name="notes" maxlength="500" rows="2" placeholder="Venue, theme, special requirements…"></textarea>
+            </label>
+          </div>
+          <div class="booking-actions">
+            <button type="button" class="btn btn-ghost" data-booking-close>
+              <i class="fas fa-times"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-whatsapp">
+              <i class="fab fa-whatsapp"></i> Confirm &amp; Open WhatsApp
+            </button>
+          </div>
+          <p class="booking-foot" id="bookingFoot">
+            <i class="fas fa-shield-halved"></i> Your details are stored locally and shared only with the assigned manager.
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

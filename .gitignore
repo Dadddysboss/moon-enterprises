@@ -1,0 +1,35 @@
+# Vercel deployment cache
+.vercel
+
+# Local test scripts (one-shot artifacts)
+test-*.js
+build-*.js
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment / secrets (NEVER commit GH tokens etc.)
+.env
+.env.local
+.env.*.local
+*.pem
+secrets.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Local data dumps
+*.dump
+*.bak

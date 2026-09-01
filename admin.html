@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Dripp CMS — Moon Enterprises</title>
+  <link rel="icon" type="image/jpeg" href="assets/images/moon manager.jpeg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="dripp-body">
+
+  <!-- LOGIN VIEW -->
+  <div class="dripp-login" id="loginView">
+    <div class="dripp-login-card">
+      <div class="dripp-login-brand">
+        <i class="fas fa-droplet"></i>
+        <span>Dripp</span>
+        <small>Moon Enterprises CMS</small>
+      </div>
+      <form class="dripp-login-form" id="loginForm" novalidate>
+        <label class="dripp-field">
+          <span>Username or Email</span>
+          <div class="dripp-input-wrap">
+            <i class="fas fa-user"></i>
+            <input type="text" name="user" id="loginUser" required autocomplete="username" placeholder="hammad">
+          </div>
+        </label>
+        <label class="dripp-field">
+          <span>Password</span>
+          <div class="dripp-input-wrap">
+            <i class="fas fa-lock"></i>
+            <input type="password" name="pass" id="loginPass" required autocomplete="current-password" placeholder="••••••••">
+            <button type="button" class="dripp-eye" id="togglePass" aria-label="Show password">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </label>
+        <button type="submit" class="dripp-btn dripp-btn-primary dripp-btn-block">
+          <i class="fas fa-arrow-right"></i> Sign In to Dripp
+        </button>
+        <p class="dripp-login-error" id="loginError" role="alert"></p>
+      </form>
+      <p class="dripp-login-foot">
+        <i class="fas fa-shield-halved"></i> Zero-dependency, LocalStorage-backed CMS
+      </p>
+    </div>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div class="dripp-app" id="dashboardView" hidden>
+    <aside class="dripp-sidebar">
+      <div class="dripp-sidebar-brand">
+        <i class="fas fa-droplet"></i>
+        <span>Dripp</span>
+      </div>
+      <nav class="dripp-nav">
+        <button class="dripp-nav-btn active" data-section="dashboard">
+          <i class="fas fa-chart-line"></i><span>Dashboard</span>
+        </button>
+        <button class="dripp-nav-btn" data-section="talent-a">
+          <i class="fas fa-user-astronaut"></i><span>Division A Talent</span>
+          <em class="dripp-count" id="countA">0</em>
+        </button>
+        <button class="dripp-nav-btn" data-section="talent-b">
+          <i class="fas fa-user-tie"></i><span>Division B Talent</span>
+          <em class="dripp-count" id="countB">0</em>
+        </button>
+        <button class="dripp-nav-btn" data-section="packages">
+          <i class="fas fa-box-open"></i><span>Package Deals</span>
+          <em class="dripp-count" id="countP">0</em>
+        </button>
+        <button class="dripp-nav-btn" data-section="hero">
+          <i class="fas fa-image"></i><span>Hero & Banner</span>
+        </button>
+        <button class="dripp-nav-btn" data-section="news">
+          <i class="fas fa-newspaper"></i><span>News Publisher</span>
+          <em class="dripp-count" id="countN">0</em>
+        </button>
+        <button class="dripp-nav-btn" data-section="bookings">
+          <i class="fas fa-calendar-check"></i><span>Bookings Log</span>
+          <em class="dripp-count" id="countBk">0</em>
+        </button>
+        <button class="dripp-nav-btn" data-section="reviews-mgr">
+          <i class="fas fa-comments"></i><span>Reviews &amp; Comments</span>
+          <em class="dripp-count" id="countRv">0</em>
+        </button>
+        <button class="dripp-nav-btn" data-section="contact">
+          <i class="fas fa-address-book"></i><span>Contact Info</span>
+        </button>
+        <button class="dripp-nav-btn" data-section="site-content">
+          <i class="fas fa-pen-fancy"></i><span>Site Content</span>
+        </button>
+        <button class="dripp-nav-btn" data-section="github-sync">
+          <i class="fab fa-github"></i><span>GitHub Sync</span>
+        </button>
+        <button class="dripp-nav-btn" data-section="settings">
+          <i class="fas fa-gear"></i><span>Settings</span>
+        </button>
+      </nav>
+      <div class="dripp-sidebar-foot">
+        <button class="dripp-btn dripp-btn-ghost" id="logoutBtn">
+          <i class="fas fa-right-from-bracket"></i> Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <main class="dripp-main">
+      <header class="dripp-topbar">
+        <button class="dripp-mobile-toggle" id="mobileToggle" aria-label="Menu">
+          <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="dripp-page-title" id="pageTitle">Dashboard</h1>
+        <div class="dripp-topbar-actions">
+          <a href="index.html" target="_blank" class="dripp-btn dripp-btn-ghost">
+            <i class="fas fa-up-right-from-square"></i> View Site
+          </a>
+          <span class="dripp-user-chip">
+            <i class="fas fa-user"></i> hammad
+          </span>
+        </div>
+      </header>
+
+      <div class="dripp-content" id="drippContent"></div>
+    </main>
+  </div>
+
+  <!-- TOAST -->
+  <div class="dripp-toast" id="drippToast" role="status" aria-live="polite"></div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

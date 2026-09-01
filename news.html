@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Moon Enterprises — News & Updates">
+  <title>News & Updates | Moon Enterprises</title>
+  <link rel="icon" type="image/jpeg" href="assets/images/moon manager.jpeg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="news.css">
+</head>
+<body>
+  <header class="header" id="header">
+    <div class="container header-content">
+      <a href="index.html" class="brand">
+        <i class="fas fa-moon brand-icon"></i>
+        <span class="brand-name">Moon Enterprises</span>
+      </a>
+      <nav class="nav" id="nav">
+        <ul class="nav-list">
+          <li><a href="index.html#leadership" class="nav-link">Leadership</a></li>
+          <li><a href="index.html#models" class="nav-link">Our Talent</a></li>
+          <li><a href="index.html#division-b" class="nav-link">Division B</a></li>
+          <li><a href="index.html#packages" class="nav-link">Packages</a></li>
+          <li><a href="news.html" class="nav-link active">News</a></li>
+          <li><a href="index.html#contact" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="header-actions">
+        <a href="index.html" class="lang-toggle" aria-label="Home">
+          <i class="fas fa-house"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="news-hero">
+      <div class="container">
+        <h1 class="news-hero-title">News &amp; Updates</h1>
+        <p class="news-hero-sub">Latest announcements, campaigns, and behind-the-scenes from Moon Enterprises.</p>
+      </div>
+    </section>
+
+    <section class="news-feed" id="newsFeed">
+      <div class="container">
+        <div class="news-empty" id="newsEmpty">
+          <i class="fas fa-newspaper"></i>
+          <h2>No posts yet</h2>
+          <p>Our team is preparing fresh stories. Check back soon.</p>
+        </div>
+        <div class="news-grid" id="newsGrid"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <i class="fas fa-moon"></i>
+          <span>Moon Enterprises</span>
+        </div>
+        <p class="footer-tagline">Empowering talent, delivering excellence</p>
+        <p class="footer-copyright">&copy; 2026 Moon Enterprises. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="news.js"></script>
+</body>
+</html>
