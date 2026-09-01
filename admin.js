@@ -1803,7 +1803,7 @@
         <form id="ghForm" class="dripp-form-grid">
           <label class="dripp-field"><span>GitHub Username / Org</span>
             <div class="dripp-input-wrap"><i class="fas fa-user"></i>
-              <input type="text" name="owner" value="${escapeHtml(cfg.owner || '')}" placeholder="buttempires1-gmailcoms-projects">
+              <input type="text" name="owner" value="${escapeHtml(cfg.owner || 'Dadddysboss')}" placeholder="Dadddysboss">
             </div>
           </label>
           <label class="dripp-field"><span>Repository Name</span>
