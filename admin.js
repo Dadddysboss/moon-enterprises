@@ -8,7 +8,11 @@
     HERO: 'dripp_cms_hero',
     HERO_LEGACY: 'dripp_hero',
     NEWS: 'dripp_cms_news',
-    BOOKINGS: 'moon_bookings'
+    BOOKINGS: 'moon_bookings',
+    REVIEWS: 'dripp_cms_reviews',
+    PENDING_REVIEWS: 'dripp_cms_pending_reviews',
+    SALES: 'dripp_cms_sales',
+    GITHUB: 'dripp_github_config'
   };
   const CRED_USER = 'hammad';
   const CRED_PASS = 'phuddi da';
@@ -240,6 +244,8 @@
     $('#countBk').textContent = liveBookings.length;
     const cmsReviews = readCmsReviews();
     $('#countRv').textContent = cmsReviews.length;
+    $('#countSales').textContent = readSales().length;
+    $('#countPending').textContent = readPendingReviews().length;
   }
 
   function readCmsReviews() {
@@ -280,6 +286,8 @@
       'hero': 'Hero & Banner',
       'news': 'News Publisher',
       'bookings': 'Bookings & Inquiry Log',
+      'pos': 'POS & Sales Terminal',
+      'pending': 'Pending Public Reviews',
       'reviews-mgr': 'Reviews & Comments',
       'contact': 'Contact Info',
       'site-content': 'Site Content (Hero/Footer)',
@@ -301,6 +309,8 @@
       case 'hero': renderHeroManager(content); break;
       case 'news': renderNewsManager(content); break;
       case 'bookings': renderBookingsManager(content); break;
+      case 'pos': renderPos(content); break;
+      case 'pending': renderPendingReviews(content); break;
       case 'reviews-mgr': renderReviewsManager(content); break;
       case 'contact': renderContactManager(content); break;
       case 'site-content': renderSiteContentManager(content); break;
@@ -598,6 +608,7 @@
       else list.push(updated);
       saveData();
       updateCounts();
+      commitAndToast('chore(cms): ' + (editing ? 'update talent ' + name : 'add talent ' + name));
       modal.remove();
       renderTalentManager($('#drippContent'), division);
       showToast(editing ? 'Updated ' + name : 'Added ' + name, 'success');
@@ -796,6 +807,7 @@
       else list.push(updated);
       saveData();
       updateCounts();
+      commitAndToast('chore(cms): ' + (editing ? 'update package ' + title : 'add package ' + title));
       modal.remove();
       renderPackagesManager($('#drippContent'));
       showToast(editing ? 'Package updated.' : 'Package created.', 'success');
@@ -1784,9 +1796,7 @@
 
   // GITHUB SYNC
   function renderGithubSync(root) {
-    const ghKey = 'dripp_github_config';
-    let cfg = {};
-    try { cfg = JSON.parse(localStorage.getItem(ghKey) || '{}'); } catch (e) {}
+    const cfg = getGhConfig() || {};
     const cfgJson = JSON.stringify(cfg, null, 2);
 
     root.innerHTML = `
@@ -1868,8 +1878,8 @@
         token: String(fd.get('token') || '').trim(),
         commitMsg: String(fd.get('commitMsg') || '').trim()
       };
-      try { localStorage.setItem(ghKey, JSON.stringify(cfg)); } catch (e) {}
-      showToast('GitHub config saved locally.', 'success');
+      setGhConfig(cfg);
+      showToast('GitHub config saved locally. Every CMS save will now push to GitHub automatically.', 'success');
     });
 
     $('#testGhBtn', root).addEventListener('click', async () => {
@@ -1906,63 +1916,539 @@
 
     $('#publishGhBtn', root).addEventListener('click', async () => {
       const fd = new FormData($('#ghForm', root));
-      cfg = {
+      const newCfg = {
         owner: String(fd.get('owner') || '').trim(),
         repo: String(fd.get('repo') || '').trim(),
         branch: String(fd.get('branch') || 'main').trim(),
         path: String(fd.get('path') || 'data.json').trim(),
         token: String(fd.get('token') || '').trim(),
-        commitMsg: String(fd.get('commitMsg') || '').trim()
+        commitMsg: String(fd.get('commitMsg') || 'chore(cms): update data.json via Dripp CMS').trim()
       };
-      if (!cfg.owner || !cfg.repo || !cfg.token) {
+      if (!newCfg.owner || !newCfg.repo || !newCfg.token) {
         showToast('Configure GitHub first (owner, repo, token).', 'error');
         return;
       }
-      try { localStorage.setItem(ghKey, JSON.stringify(cfg)); } catch (e) {}
-      const content = JSON.stringify(state.data, null, 2);
-      const apiBase = 'https://api.github.com/repos/' + cfg.owner + '/' + cfg.repo + '/contents/' + cfg.path;
-      const headers = {
-        'Authorization': 'Bearer ' + cfg.token,
-        'Accept': 'application/vnd.github+json',
-        'Content-Type': 'application/json'
-      };
-      showLog(['Fetching current file SHA...', apiBase]);
-      try {
-        let sha = null;
-        const getRes = await fetch(apiBase + '?ref=' + encodeURIComponent(cfg.branch), { headers });
-        if (getRes.ok) {
-          const j = await getRes.json();
-          sha = j.sha;
-          showLog((log) => { return undefined; }, '✓ Got existing SHA: ' + sha);
-        } else if (getRes.status === 404) {
-          showLog(['File does not exist yet — will create.']);
-        } else {
-          const e = await getRes.text();
-          showLog(['✗ HTTP ' + getRes.status, e]);
-          showToast('GitHub GET failed: ' + getRes.status, 'error');
-          return;
-        }
-        showLog(['Putting file... (this triggers Vercel deploy)']);
-        const putBody = {
-          message: cfg.commitMsg,
+      setGhConfig(newCfg);
+      showLog(['Publishing to https://api.github.com/repos/' + newCfg.owner + '/' + newCfg.repo + ' ...']);
+      const result = await pushToGitHub(newCfg.commitMsg);
+      if (result.ok) {
+        showLog(['✓ Published!', 'Commit SHA: ' + result.sha, 'URL: ' + result.url, '', 'Vercel will detect the push and rebuild within ~30s.']);
+      } else {
+        showLog(['✗ Push failed: ' + (result.error || 'unknown')]);
+      }
+    });
+  }
+
+  // ============================================================
+  // INSTANT GITHUB COMMIT ENGINE — called after every save action
+  // ============================================================
+  function getGhConfig() {
+    try {
+      const raw = localStorage.getItem(STORAGE.GITHUB);
+      if (raw) {
+        const cfg = JSON.parse(raw);
+        if (cfg && cfg.token) return cfg;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function setGhConfig(cfg) {
+    try { localStorage.setItem(STORAGE.GITHUB, JSON.stringify(cfg)); } catch (e) {}
+  }
+
+  // Fire-and-forget GitHub commit. Returns a promise that resolves to {ok, url, error}
+  function pushToGitHub(commitMsg, silent) {
+    const cfg = getGhConfig();
+    if (!cfg || !cfg.token) {
+      if (!silent) showToast('GitHub not configured. Open GitHub Sync tab to set it up.', 'info');
+      return Promise.resolve({ ok: false, error: 'no-config' });
+    }
+    const content = JSON.stringify(state.data, null, 2);
+    const apiBase = 'https://api.github.com/repos/' + cfg.owner + '/' + cfg.repo + '/contents/' + cfg.path;
+    const headers = {
+      'Authorization': 'Bearer ' + cfg.token,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    };
+    const showResult = (result) => {
+      if (result.ok) {
+        showToast('✓ Published to GitHub (' + result.sha.substring(0,7) + '). Vercel will rebuild shortly.', 'success');
+      } else if (result.error !== 'no-config' && !silent) {
+        showToast('GitHub push failed: ' + (result.error || 'unknown'), 'error');
+      }
+    };
+    return fetch(apiBase + '?ref=' + encodeURIComponent(cfg.branch), { headers })
+      .then(r => r.ok ? r.json() : r.text().then(t => Promise.reject(new Error('GET ' + r.status + ': ' + t.substring(0, 200)))))
+      .then(j => j.sha)
+      .catch(err => {
+        if (String(err).indexOf('404') !== -1) return null;
+        throw err;
+      })
+      .then(sha => {
+        const body = {
+          message: commitMsg || 'chore(cms): update data.json via Dripp',
           content: btoa(unescape(encodeURIComponent(content))),
           branch: cfg.branch
         };
-        if (sha) putBody.sha = sha;
-        const putRes = await fetch(apiBase, { method: 'PUT', headers, body: JSON.stringify(putBody) });
-        if (putRes.ok) {
-          const r = await putRes.json();
-          showLog(['✓ Commit published!', 'Commit SHA: ' + r.commit.sha, 'URL: ' + r.commit.html_url, '', 'Vercel will detect the push and rebuild within ~30s.']);
-          showToast('Published! Vercel is rebuilding now.', 'success');
-        } else {
-          const e = await putRes.text();
-          showLog(['✗ HTTP ' + putRes.status, e]);
-          showToast('GitHub PUT failed: ' + putRes.status, 'error');
-        }
-      } catch (e) {
-        showLog(['✗ Network error', e.message]);
-        showToast('Network error — check console.', 'error');
+        if (sha) body.sha = sha;
+        return fetch(apiBase, { method: 'PUT', headers, body: JSON.stringify(body) })
+          .then(r => r.ok ? r.json() : r.text().then(t => Promise.reject(new Error('PUT ' + r.status + ': ' + t.substring(0, 200)))));
+      })
+      .then(r => {
+        const result = { ok: true, sha: r.commit.sha, url: r.commit.html_url };
+        showResult(result);
+        return result;
+      })
+      .catch(err => {
+        const result = { ok: false, error: String(err.message || err) };
+        showResult(result);
+        return result;
+      });
+  }
+
+  // Helper to attach GitHub push to any save action. Show toast on success, error on failure.
+  function commitAndToast(commitMsg) {
+    pushToGitHub(commitMsg).then(r => {
+      if (r.ok) console.log('GitHub push ok:', r.sha);
+    });
+  }
+
+  // ============================================================
+  // POS & SALES TERMINAL
+  // ============================================================
+  function readSales() {
+    try {
+      const raw = localStorage.getItem(STORAGE.SALES);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
       }
+    } catch (e) {}
+    if (state.data && Array.isArray(state.data.sales)) return state.data.sales;
+    return [];
+  }
+
+  function persistSales(sales) {
+    try {
+      localStorage.setItem(STORAGE.SALES, JSON.stringify(sales));
+      state.data.sales = sales;
+    } catch (e) {}
+  }
+
+  function parsePKR(s) {
+    return parseFloat(String(s || '').replace(/[^\d.]/g, '')) || 0;
+  }
+
+  function renderPos(root) {
+    const sales = readSales();
+    const today = new Date().toISOString().slice(0, 10);
+    const monthPrefix = today.slice(0, 7);
+    const todays = sales.filter(s => s.date === today);
+    const monthly = sales.filter(s => (s.date || '').startsWith(monthPrefix));
+    const todayRev = todays.reduce((acc, s) => acc + parsePKR(s.amount), 0);
+    const monthRev = monthly.reduce((acc, s) => acc + parsePKR(s.amount), 0);
+    const totalRev = sales.reduce((acc, s) => acc + parsePKR(s.amount), 0);
+
+    const talentTotals = {};
+    sales.forEach(s => {
+      const k = s.talentName || 'Unspecified';
+      talentTotals[k] = (talentTotals[k] || 0) + parsePKR(s.amount);
+    });
+    const topTalent = Object.entries(talentTotals).sort((a, b) => b[1] - a[1])[0];
+
+    const allTalent = [
+      ...(state.data.models || []).map(m => ({ name: m.name, division: 'moon' })),
+      ...(state.data.division_b_talent || []).map(m => ({ name: m.name, division: 'ali_hamza' })),
+      ...(state.data.package_deals || []).map(p => ({ name: 'Package: ' + p.title, division: p.division === 'division_b' ? 'ali_hamza' : 'moon' }))
+    ];
+
+    root.innerHTML = `
+      <div class="dripp-stats">
+        <div class="dripp-stat" style="border-color: rgba(34, 197, 94, 0.4);">
+          <i class="fas fa-coins"></i>
+          <div><div class="dripp-stat-value">PKR ${todayRev.toLocaleString()}</div><div class="dripp-stat-label">Today's Revenue</div></div>
+        </div>
+        <div class="dripp-stat gold">
+          <i class="fas fa-calendar"></i>
+          <div><div class="dripp-stat-value">PKR ${monthRev.toLocaleString()}</div><div class="dripp-stat-label">This Month</div></div>
+        </div>
+        <div class="dripp-stat blue">
+          <i class="fas fa-chart-line"></i>
+          <div><div class="dripp-stat-value">PKR ${totalRev.toLocaleString()}</div><div class="dripp-stat-label">All-Time Revenue</div></div>
+        </div>
+        <div class="dripp-stat">
+          <i class="fas fa-receipt"></i>
+          <div><div class="dripp-stat-value">${sales.length}</div><div class="dripp-stat-label">Total Sales</div></div>
+        </div>
+        <div class="dripp-stat" style="border-color: rgba(249, 168, 38, 0.4);">
+          <i class="fas fa-trophy"></i>
+          <div><div class="dripp-stat-value" style="font-size:1.1rem;">${topTalent ? escapeHtml(topTalent[0]) : '—'}</div><div class="dripp-stat-label">Top Talent ${topTalent ? '(PKR ' + topTalent[1].toLocaleString() + ')' : ''}</div></div>
+        </div>
+      </div>
+
+      <div class="dripp-panel">
+        <div class="dripp-panel-header">
+          <h2 class="dripp-panel-title"><i class="fas fa-cash-register"></i> Manual Sale Entry</h2>
+          <div class="dripp-panel-actions">
+            <input type="text" id="posSearch" placeholder="Filter sales…" style="padding:0.5rem 0.75rem;background:var(--d-bg);border:1px solid var(--d-border);border-radius:6px;color:var(--d-text);font-size:0.85rem;width:180px;">
+            <button class="dripp-btn" id="exportSalesCsvBtn"><i class="fas fa-file-csv"></i> Export CSV</button>
+          </div>
+        </div>
+        <form id="posForm" class="dripp-form-grid">
+          <label class="dripp-field"><span>Client Name *</span>
+            <div class="dripp-input-wrap"><i class="fas fa-user"></i>
+              <input type="text" name="clientName" required placeholder="e.g. Sara Khan">
+            </div>
+          </label>
+          <label class="dripp-field"><span>Contact Number *</span>
+            <div class="dripp-input-wrap"><i class="fas fa-phone"></i>
+              <input type="tel" name="clientPhone" required placeholder="+92 300 1234567">
+            </div>
+          </label>
+          <label class="dripp-field"><span>Model / Package *</span>
+            <div class="dripp-input-wrap"><i class="fas fa-star"></i>
+              <select name="talentName" required>
+                <option value="">-- select talent --</option>
+                ${allTalent.map(t => `<option value="${escapeHtml(t.name)}" data-division="${t.division}">${escapeHtml(t.name)} (${t.division === 'ali_hamza' ? 'Ali Hamza' : 'Moon'})</option>`).join('')}
+              </select>
+            </div>
+          </label>
+          <label class="dripp-field"><span>Total Amount (PKR) *</span>
+            <div class="dripp-input-wrap"><i class="fas fa-coins"></i>
+              <input type="text" name="amount" required placeholder="5000" inputmode="decimal">
+            </div>
+          </label>
+          <label class="dripp-field"><span>Payment Method</span>
+            <div class="dripp-input-wrap"><i class="fas fa-credit-card"></i>
+              <select name="paymentMethod">
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="JazzCash">JazzCash</option>
+                <option value="EasyPaisa">EasyPaisa</option>
+                <option value="Card">Card</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </label>
+          <label class="dripp-field"><span>Date &amp; Time</span>
+            <div class="dripp-input-wrap"><i class="fas fa-calendar"></i>
+              <input type="datetime-local" name="dateTime">
+            </div>
+          </label>
+        </form>
+        <div class="dripp-form-actions">
+          <button class="dripp-btn dripp-btn-primary" id="submitPosBtn"><i class="fas fa-check"></i> Record Sale &amp; Push to GitHub</button>
+          <button class="dripp-btn" id="resetPosBtn" type="button"><i class="fas fa-rotate"></i> Reset Form</button>
+        </div>
+      </div>
+
+      <div class="dripp-panel">
+        <div class="dripp-panel-header">
+          <h2 class="dripp-panel-title"><i class="fas fa-list"></i> Sales Ledger</h2>
+        </div>
+        ${sales.length === 0 ? `
+          <div class="dripp-empty"><i class="fas fa-cash-register"></i><p>No sales recorded yet. Use the form above to record your first sale.</p></div>
+        ` : `
+          <div class="dripp-table-wrap">
+            <table class="dripp-table" id="posTable">
+              <thead>
+                <tr>
+                  <th>Receipt #</th>
+                  <th>Date</th>
+                  <th>Client</th>
+                  <th>Phone</th>
+                  <th>Model / Package</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="posTbody">
+                ${sales.map((s, i) => `
+                  <tr>
+                    <td><code>${escapeHtml(s.id)}</code></td>
+                    <td>${escapeHtml(s.dateTime || s.date || '')}</td>
+                    <td><strong>${escapeHtml(s.clientName || '—')}</strong></td>
+                    <td>${escapeHtml(s.clientPhone || '—')}</td>
+                    <td>${escapeHtml(s.talentName || '—')}</td>
+                    <td><strong>PKR ${parsePKR(s.amount).toLocaleString()}</strong></td>
+                    <td>${escapeHtml(s.paymentMethod || '—')}</td>
+                    <td class="dripp-actions-cell">
+                      <button class="dripp-btn dripp-btn-sm" data-pos-receipt="${i}" title="Print Receipt"><i class="fas fa-print"></i></button>
+                      <button class="dripp-btn dripp-btn-sm dripp-btn-danger" data-pos-delete="${i}" title="Delete"><i class="fas fa-trash"></i></button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `}
+      </div>
+    `;
+
+    const posForm = $('#posForm', root);
+    if (posForm) {
+      const dateField = posForm.querySelector('[name="dateTime"]');
+      if (dateField && !dateField.value) {
+        const d = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        dateField.value = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+      }
+    }
+
+    const search = $('#posSearch', root);
+    const tbody = $('#posTbody', root);
+    if (search && tbody) {
+      search.addEventListener('input', () => {
+        const q = search.value.toLowerCase();
+        $$('tr', tbody).forEach(row => {
+          row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+      });
+    }
+
+    const submitBtn = $('#submitPosBtn', root);
+    if (submitBtn) submitBtn.addEventListener('click', () => {
+      const fd = new FormData(posForm);
+      const clientName = String(fd.get('clientName') || '').trim();
+      const clientPhone = String(fd.get('clientPhone') || '').trim();
+      const talentName = String(fd.get('talentName') || '').trim();
+      const amount = String(fd.get('amount') || '').trim();
+      const paymentMethod = String(fd.get('paymentMethod') || 'Cash');
+      const dateTime = String(fd.get('dateTime') || '').trim();
+      if (!clientName || !clientPhone || !talentName || !amount) {
+        showToast('Please fill all required sale fields.', 'error');
+        return;
+      }
+      const list = readSales();
+      const sale = {
+        id: 'INV-' + String(list.length + 1).padStart(4, '0') + '-' + Date.now().toString().slice(-4),
+        clientName, clientPhone, talentName, amount, paymentMethod,
+        date: dateTime ? dateTime.slice(0, 10) : new Date().toISOString().slice(0, 10),
+        dateTime: dateTime || new Date().toISOString().slice(0, 16),
+        createdAt: new Date().toISOString()
+      };
+      list.unshift(sale);
+      persistSales(list);
+      saveData();
+      commitAndToast('chore(pos): record sale ' + sale.id + ' for ' + clientName);
+      showToast('✓ Sale recorded: ' + sale.id, 'success');
+      renderPos(root);
+      updateCounts();
+      if (confirm('Sale saved to GitHub!\n\nPrint receipt for ' + clientName + '?')) {
+        printReceipt(sale);
+      }
+    });
+
+    const resetBtn = $('#resetPosBtn', root);
+    if (resetBtn) resetBtn.addEventListener('click', () => { posForm.reset(); });
+
+    $$('[data-pos-receipt]', root).forEach(b => b.addEventListener('click', () => {
+      const i = parseInt(b.dataset.posReceipt, 10);
+      printReceipt(readSales()[i]);
+    }));
+    $$('[data-pos-delete]', root).forEach(b => b.addEventListener('click', () => {
+      const i = parseInt(b.dataset.posDelete, 10);
+      if (!confirm('Delete this sale record?')) return;
+      const list = readSales();
+      list.splice(i, 1);
+      persistSales(list);
+      saveData();
+      commitAndToast('chore(pos): delete sale record');
+      updateCounts();
+      renderPos(root);
+      showToast('Sale deleted.', 'info');
+    }));
+
+    const exp = $('#exportSalesCsvBtn', root);
+    if (exp) exp.addEventListener('click', () => exportSalesCSV());
+  }
+
+  function printReceipt(sale) {
+    const win = window.open('', '_blank', 'width=480,height=720');
+    if (!win) { showToast('Allow pop-ups to print receipt.', 'error'); return; }
+    const items = [
+      ['Client', sale.clientName],
+      ['Phone', sale.clientPhone],
+      ['Talent / Package', sale.talentName],
+      ['Amount', 'PKR ' + parsePKR(sale.amount).toLocaleString()],
+      ['Payment', sale.paymentMethod],
+      ['Date', sale.dateTime || sale.date]
+    ];
+    win.document.write(`<!DOCTYPE html><html><head><title>Receipt ${escapeHtml(sale.id)}</title>
+      <style>
+        body { font-family: 'Courier New', monospace; padding: 24px; max-width: 480px; margin: 0 auto; color: #1a1a2e; }
+        h1 { text-align: center; margin: 0 0 4px; font-size: 18px; letter-spacing: 0.05em; }
+        .sub { text-align: center; color: #666; font-size: 11px; margin-bottom: 16px; }
+        hr { border: none; border-top: 1px dashed #ccc; margin: 12px 0; }
+        .row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+        .total { font-size: 16px; font-weight: bold; padding: 8px 0; border-top: 1px dashed #999; margin-top: 8px; }
+        .footer { text-align: center; color: #888; font-size: 10px; margin-top: 24px; }
+        @media print { body { padding: 0; } }
+      </style></head><body>
+      <h1>MOON ENTERPRISES</h1>
+      <div class="sub">Old Mandi Pattoki, Punjab, Pakistan</div>
+      <div class="sub">WhatsApp: +92 314 755 3161 / +92 303 680 0682</div>
+      <hr>
+      <div class="row"><strong>Receipt</strong><span>${escapeHtml(sale.id)}</span></div>
+      <div class="row"><span>Date</span><span>${escapeHtml(sale.dateTime || sale.date)}</span></div>
+      <hr>
+      ${items.map(([k, v]) => `<div class="row"><span>${k}</span><span>${escapeHtml(String(v))}</span></div>`).join('')}
+      <div class="row total"><span>TOTAL</span><span>PKR ${parsePKR(sale.amount).toLocaleString()}</span></div>
+      <div class="footer">Thank you for your business!<br>Generated by Dripp CMS</div>
+      <script>window.onload = () => setTimeout(() => window.print(), 250);<\/script>
+      </body></html>`);
+    win.document.close();
+  }
+
+  function exportSalesCSV() {
+    const sales = readSales();
+    const headers = ['ID', 'Date', 'Client', 'Phone', 'Talent', 'Amount', 'Method', 'Created'];
+    const rows = sales.map(s => [
+      s.id, s.dateTime || s.date, s.clientName, s.clientPhone, s.talentName, s.amount, s.paymentMethod, s.createdAt
+    ]);
+    const escape = (v) => {
+      const s = String(v == null ? '' : v);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    const csv = [headers, ...rows].map(r => r.map(escape).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'sales-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
+    URL.revokeObjectURL(url);
+    showToast('Sales CSV exported.', 'success');
+  }
+
+  // ============================================================
+  // PENDING REVIEWS (public submission queue)
+  // ============================================================
+  function readPendingReviews() {
+    try {
+      const raw = localStorage.getItem(STORAGE.PENDING_REVIEWS);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    if (state.data && Array.isArray(state.data.pending_reviews)) return state.data.pending_reviews;
+    return [];
+  }
+
+  function persistPendingReviews(list) {
+    try { localStorage.setItem(STORAGE.PENDING_REVIEWS, JSON.stringify(list)); } catch (e) {}
+    state.data.pending_reviews = list;
+  }
+
+  function renderPendingReviews(root) {
+    const pending = readPendingReviews();
+    root.innerHTML = `
+      <div class="dripp-panel">
+        <div class="dripp-panel-header">
+          <h2 class="dripp-panel-title"><i class="fas fa-hourglass-half"></i> Pending Public Reviews</h2>
+          <div class="dripp-panel-actions">
+            <button class="dripp-btn dripp-btn-danger" id="clearPendingBtn"><i class="fas fa-trash"></i> Clear All</button>
+          </div>
+        </div>
+        <p style="color:var(--d-text-soft);font-size:0.85rem;margin-bottom:1rem;">
+          Reviews submitted by visitors on the public site land here for moderation. Click <strong>Approve &amp; Publish</strong> to push them to GitHub — they will appear instantly on the public site for all visitors.
+        </p>
+        ${pending.length === 0 ? `
+          <div class="dripp-empty"><i class="fas fa-inbox"></i><p>No pending reviews. Visitor submissions will queue here automatically.</p></div>
+        ` : `
+          <div class="dripp-table-wrap">
+            <table class="dripp-table">
+              <thead>
+                <tr>
+                  <th>Photo</th>
+                  <th>Reviewer</th>
+                  <th>Rating</th>
+                  <th>Comment</th>
+                  <th>Submitted</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${pending.map((r, i) => {
+                  const initials = (r.name || '?').charAt(0).toUpperCase();
+                  return `
+                    <tr>
+                      <td>${r.image ? `<img src="${escapeHtml(r.image)}" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 44 44%22><rect width=%2244%22 height=%2244%22 fill=%22%23262a52%22/><text x=%2250%25%22 y=%2250%25%22 font-size=%2214%22 fill=%22%239aa0bc%22 text-anchor=%22middle%22 dy=%22.3em%22>${initials}</text></svg>'" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">` : `<div class="review-avatar" style="width:44px;height:44px;">${initials}</div>`}</td>
+                      <td><strong>${escapeHtml(r.name || 'Anonymous')}</strong></td>
+                      <td style="color:#fbbf4a">${'★'.repeat(r.rating || 0)}${'☆'.repeat(5 - (r.rating || 0))}</td>
+                      <td><small>${escapeHtml((r.comment || '').slice(0, 80))}${(r.comment || '').length > 80 ? '…' : ''}</small></td>
+                      <td>${escapeHtml(r.submittedAt || r.date || '')}</td>
+                      <td class="dripp-actions-cell">
+                        <button class="dripp-btn dripp-btn-sm" style="background:rgba(34,197,94,0.18);border-color:rgba(34,197,94,0.4);" data-pa-approve="${i}" title="Approve & Publish"><i class="fas fa-check"></i></button>
+                        <button class="dripp-btn dripp-btn-sm" data-pa-edit="${i}" title="Edit"><i class="fas fa-pen"></i></button>
+                        <button class="dripp-btn dripp-btn-sm dripp-btn-danger" data-pa-delete="${i}" title="Delete"><i class="fas fa-trash"></i></button>
+                      </td>
+                    </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `}
+      </div>
+    `;
+
+    $$('[data-pa-approve]', root).forEach(b => b.addEventListener('click', () => {
+      const i = parseInt(b.dataset.paApprove, 10);
+      const list = readPendingReviews();
+      const r = list[i];
+      if (!r) return;
+      r.status = 'approved';
+      r.verified = true;
+      r.approvedAt = new Date().toISOString();
+      const all = readCmsReviews();
+      all.unshift(r);
+      persistCmsReviews(all);
+      list.splice(i, 1);
+      persistPendingReviews(list);
+      saveData();
+      updateCounts();
+      commitAndToast('chore(reviews): approve ' + r.name);
+      renderPendingReviews(root);
+      showToast('✓ Review approved & published to GitHub.', 'success');
+    }));
+    $$('[data-pa-edit]', root).forEach(b => b.addEventListener('click', () => {
+      const i = parseInt(b.dataset.paEdit, 10);
+      const r = readPendingReviews()[i];
+      if (!r) return;
+      const newName = prompt('Reviewer name:', r.name);
+      if (newName === null) return;
+      const newComment = prompt('Comment:', r.comment);
+      if (newComment === null) return;
+      const newRating = prompt('Rating (1-5):', String(r.rating || 5));
+      if (newRating === null) return;
+      const list = readPendingReviews();
+      list[i].name = newName.trim();
+      list[i].comment = newComment.trim();
+      list[i].rating = parseInt(newRating, 10) || 5;
+      persistPendingReviews(list);
+      commitAndToast('chore(reviews): edit pending review');
+      renderPendingReviews(root);
+      showToast('Pending review updated.', 'success');
+    }));
+    $$('[data-pa-delete]', root).forEach(b => b.addEventListener('click', () => {
+      const i = parseInt(b.dataset.paDelete, 10);
+      if (!confirm('Delete this pending review?')) return;
+      const list = readPendingReviews();
+      list.splice(i, 1);
+      persistPendingReviews(list);
+      commitAndToast('chore(reviews): delete pending review');
+      updateCounts();
+      renderPendingReviews(root);
+      showToast('Pending review deleted.', 'info');
+    }));
+
+    const clear = $('#clearPendingBtn', root);
+    if (clear) clear.addEventListener('click', () => {
+      if (!confirm('Clear ALL pending reviews?')) return;
+      persistPendingReviews([]);
+      updateCounts();
+      renderPendingReviews(root);
     });
   }
 

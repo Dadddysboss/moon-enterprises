@@ -688,6 +688,8 @@
   },
   "news": [],
   "bookings": [],
+  "sales": [],
+  "pending_reviews": [],
   "site_content": {
     "hero": {
       "title": "Premier Talent Agency",

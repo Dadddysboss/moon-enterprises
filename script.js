@@ -9,6 +9,7 @@
   const HERO_KEYS = ['dripp_cms_hero', 'dripp_hero'];
   const NEWS_KEY = 'dripp_cms_news';
   const REVIEWS_KEY = 'dripp_cms_reviews';
+  const PENDING_REVIEWS_KEY = 'dripp_cms_pending_reviews';
 
   const I18N_STRINGS = {
     en: {
@@ -333,7 +334,7 @@
   function setupCmsSync() {
     window.addEventListener('storage', (e) => {
       if (!e.key) return;
-      const watched = [...CMS_KEYS, ...HERO_KEYS, NEWS_KEY, REVIEWS_KEY];
+      const watched = [...CMS_KEYS, ...HERO_KEYS, NEWS_KEY, REVIEWS_KEY, PENDING_REVIEWS_KEY];
       if (watched.indexOf(e.key) !== -1) {
         refreshFromCms();
       }
@@ -810,6 +811,49 @@
     });
   }
 
+  function queuePendingReview(review) {
+    try {
+      const key = 'dripp_cms_pending_reviews';
+      const raw = localStorage.getItem(key);
+      const list = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(list)) list = [];
+      review.submittedAt = new Date().toISOString();
+      review.status = 'pending';
+      list.unshift(review);
+      localStorage.setItem(key, JSON.stringify(list));
+    } catch (e) { console.warn('Could not queue review:', e); }
+  }
+
+  // Direct GitHub push from public site (no admin needed). Best-effort.
+  async function tryDirectGitHubPublish(review) {
+    try {
+      const cfgRaw = localStorage.getItem('dripp_github_config');
+      if (!cfgRaw) return;
+      const cfg = JSON.parse(cfgRaw);
+      if (!cfg.token || !cfg.owner || !cfg.repo) return;
+      const apiBase = 'https://api.github.com/repos/' + cfg.owner + '/' + cfg.repo + '/contents/' + (cfg.path || 'data.json');
+      const headers = {
+        'Authorization': 'Bearer ' + cfg.token,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      };
+      const getRes = await fetch(apiBase + '?ref=' + encodeURIComponent(cfg.branch || 'main'), { headers });
+      if (!getRes.ok) return;
+      const file = await getRes.json();
+      let data = {};
+      try { data = JSON.parse(decodeURIComponent(escape(atob(file.content)))); } catch (e) { return; }
+      data.pending_reviews = Array.isArray(data.pending_reviews) ? data.pending_reviews : [];
+      data.pending_reviews.unshift(review);
+      const putBody = {
+        message: 'chore(reviews): queue public review from ' + review.name,
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+        branch: cfg.branch || 'main',
+        sha: file.sha
+      };
+      await fetch(apiBase, { method: 'PUT', headers, body: JSON.stringify(putBody) });
+    } catch (e) { /* silent */ }
+  }
+
   function setupReviewForm(formId, statusId, divisionKey) {
     const form = document.getElementById(formId);
     const status = document.getElementById(statusId);
@@ -859,13 +903,19 @@
         commentUr: comment,
         rating: ratingInput.value,
         date: new Date().toISOString().slice(0, 10),
+        division: divisionKey,
         verified: false
       };
+      // Always store locally for instant UX
       saveUserReview(divisionKey, review);
+      // Also queue to the admin's pending-reviews list so the Dripp admin can approve + push to GitHub
+      queuePendingReview({ ...review, division: divisionKey });
+      // Best-effort direct GitHub push if a token is already configured in this browser
+      tryDirectGitHubPublish({ ...review, division: divisionKey, status: 'pending' });
       form.reset();
       ratingInput.value = 0;
       stars.forEach(s => { s.classList.remove('active', 'hovered'); s.querySelector('i').classList.add('far'); s.querySelector('i').classList.remove('fas'); });
-      status.textContent = t('formStatusReview');
+      status.textContent = '✓ Review submitted! It will appear once approved by the admin.';
       status.className = 'form-status success';
       renderAllReviews();
     });
