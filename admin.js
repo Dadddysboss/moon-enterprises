@@ -58,7 +58,7 @@
   const DEFAULT_DATA = null;
 
   const state = {
-    data: null,
+    data: { models: [], division_b_talent: [], package_deals: [], news: [], divisions: {}, agency: {}, leadership: {}, sales: [], bookings: [], pending_reviews: [], cms_reviews: [], analytics: [] },
     heroImage: null,
     section: 'dashboard',
     editing: null
@@ -126,8 +126,10 @@
     let liveSha = null;
 
     // Priority 1: serverless API (reads GitHub via /api/sync)
-    const fromApi = await fetchFromApi();
-    if (fromApi) { liveData = fromApi.data; liveSha = fromApi.sha; }
+    try {
+      const fromApi = await fetchFromApi();
+      if (fromApi) { liveData = fromApi.data; liveSha = fromApi.sha; }
+    } catch (e) { console.warn('fetchFromApi failed:', e); }
 
     // Priority 2: raw data.json (Vercel-deployed)
     if (!liveData) {
@@ -137,7 +139,15 @@
       } catch (e) {}
     }
 
-    // Priority 3: LocalStorage CMS payload
+    // Always set state.data to a safe object first
+    const safeDefault = {
+      models: [], division_b_talent: [], package_deals: [], news: [],
+      sales: [], bookings: [], pending_reviews: [], cms_reviews: [], analytics: [],
+      divisions: {}, agency: {}, leadership: {}
+    };
+    state.data = Object.assign({}, safeDefault, liveData || {});
+
+    // Priority 3: LocalStorage CMS payload — only used for local edits if available
     let stored = null;
     for (const key of [STORAGE.DATA, STORAGE.DATA_LEGACY]) {
       try {
@@ -151,13 +161,9 @@
     }
 
     if (stored && stored.payload) {
-      state.data = mergeData(stored.payload, liveData);
-    } else if (liveData) {
-      state.data = liveData;
-    } else if (DEFAULT_DATA) {
-      state.data = DEFAULT_DATA;
-    } else {
-      state.data = { models: [], division_b_talent: [], package_deals: [], news: [], divisions: {}, agency: {}, leadership: {} };
+      // Merge: live data wins for talent/packages, stored wins for local-only fields
+      const merged = mergeData(stored.payload, state.data);
+      state.data = Object.assign({}, safeDefault, merged);
     }
 
     state.dataSha = liveSha;
@@ -179,16 +185,30 @@
         if (v) { state.heroImage = v; break; }
       } catch (e) {}
     }
+
+    // Final defensive: ensure all expected arrays exist
+    if (!Array.isArray(state.data.models)) state.data.models = [];
+    if (!Array.isArray(state.data.division_b_talent)) state.data.division_b_talent = [];
+    if (!Array.isArray(state.data.package_deals)) state.data.package_deals = [];
+    if (!Array.isArray(state.data.news)) state.data.news = [];
+    if (!Array.isArray(state.data.sales)) state.data.sales = [];
+    if (!Array.isArray(state.data.bookings)) state.data.bookings = [];
+    if (!Array.isArray(state.data.pending_reviews)) state.data.pending_reviews = [];
+    if (!Array.isArray(state.data.cms_reviews)) state.data.cms_reviews = [];
+    if (!Array.isArray(state.data.analytics)) state.data.analytics = [];
   }
 
   function mergeData(stored, live) {
     if (!live) return stored;
+    // Live data is the source of truth for published content.
+    // Stored (LocalStorage) takes precedence for sales/cms_reviews if they exist locally.
     return {
       ...live,
-      models: stored.models || live.models || [],
-      division_b_talent: stored.division_b_talent || live.division_b_talent || [],
-      package_deals: stored.package_deals || live.package_deals || [],
-      news: stored.news || live.news || []
+      ...(stored || {}),
+      models: (live.models && live.models.length > 0) ? live.models : ((stored && stored.models) || []),
+      division_b_talent: (live.division_b_talent && live.division_b_talent.length > 0) ? live.division_b_talent : ((stored && stored.division_b_talent) || []),
+      package_deals: (live.package_deals && live.package_deals.length > 0) ? live.package_deals : ((stored && stored.package_deals) || []),
+      news: (live.news && live.news.length > 0) ? live.news : ((stored && stored.news) || [])
     };
   }
 
@@ -226,6 +246,18 @@
   function showDashboard() {
     $('#loginView').style.display = 'none';
     $('#dashboardView').removeAttribute('hidden');
+    if (!state.data || typeof state.data !== 'object') {
+      state.data = { models: [], division_b_talent: [], package_deals: [], news: [], divisions: {}, agency: {}, leadership: {} };
+    }
+    if (!Array.isArray(state.data.models)) state.data.models = [];
+    if (!Array.isArray(state.data.division_b_talent)) state.data.division_b_talent = [];
+    if (!Array.isArray(state.data.package_deals)) state.data.package_deals = [];
+    if (!Array.isArray(state.data.news)) state.data.news = [];
+    if (!Array.isArray(state.data.sales)) state.data.sales = [];
+    if (!Array.isArray(state.data.bookings)) state.data.bookings = [];
+    if (!Array.isArray(state.data.pending_reviews)) state.data.pending_reviews = [];
+    if (!Array.isArray(state.data.cms_reviews)) state.data.cms_reviews = [];
+    if (!Array.isArray(state.data.analytics)) state.data.analytics = [];
     updateCounts();
     renderSection('dashboard');
   }
@@ -254,8 +286,12 @@
         localStorage.removeItem(FAILED_ATTEMPTS_KEY);
         localStorage.removeItem(LOCKOUT_UNTIL_KEY);
         startSession();
+        showLogin();
+        showToast('Welcome back, ' + CRED_USER + '! Loading dashboard…', 'success');
+        try {
+          await loadData();
+        } catch (e) { console.error('loadData failed:', e); }
         showDashboard();
-        showToast('Welcome back, ' + CRED_USER + '!', 'success');
       } else {
         const failed = parseInt(localStorage.getItem(FAILED_ATTEMPTS_KEY) || '0', 10) + 1;
         localStorage.setItem(FAILED_ATTEMPTS_KEY, String(failed));
@@ -325,7 +361,6 @@
       $('.dripp-sidebar').classList.toggle('open');
     });
   }
-
   function updateCounts() {
     $('#countA').textContent = (state.data.models || []).length;
     $('#countB').textContent = (state.data.division_b_talent || []).length;
@@ -392,21 +427,38 @@
     setTitle(section);
     const content = $('#drippContent');
     content.innerHTML = '';
-    switch (section) {
-      case 'dashboard': renderDashboard(content); break;
-      case 'talent-a': renderTalentManager(content, 'a'); break;
-      case 'talent-b': renderTalentManager(content, 'b'); break;
-      case 'packages': renderPackagesManager(content); break;
-      case 'hero': renderHeroManager(content); break;
-      case 'news': renderNewsManager(content); break;
-      case 'bookings': renderBookingsManager(content); break;
-      case 'pos': renderPos(content); break;
-      case 'pending': renderPendingReviews(content); break;
-      case 'reviews-mgr': renderReviewsManager(content); break;
-      case 'contact': renderContactManager(content); break;
-      case 'site-content': renderSiteContentManager(content); break;
-      case 'github-sync': renderGithubSync(content); break;
-      case 'settings': renderSettings(content); break;
+    if (!state.data || typeof state.data !== 'object') {
+      content.innerHTML = '<div class="dripp-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading data…</p></div>';
+      loadData().then(() => { updateCounts(); renderSection(section); }).catch(e => {
+        content.innerHTML = '<div class="dripp-empty"><i class="fas fa-exclamation-triangle"></i><p>Failed to load data. <button class="dripp-btn" id="retryLoadBtn">Retry</button></p></div>';
+        const btn = document.getElementById('retryLoadBtn');
+        if (btn) btn.addEventListener('click', () => renderSection(section));
+      });
+      return;
+    }
+    try {
+      switch (section) {
+        case 'dashboard': renderDashboard(content); break;
+        case 'talent-a': renderTalentManager(content, 'a'); break;
+        case 'talent-b': renderTalentManager(content, 'b'); break;
+        case 'packages': renderPackagesManager(content); break;
+        case 'hero': renderHeroManager(content); break;
+        case 'news': renderNewsManager(content); break;
+        case 'bookings': renderBookingsManager(content); break;
+        case 'pos': renderPos(content); break;
+        case 'pending': renderPendingReviews(content); break;
+        case 'reviews-mgr': renderReviewsManager(content); break;
+        case 'contact': renderContactManager(content); break;
+        case 'site-content': renderSiteContentManager(content); break;
+        case 'github-sync': renderGithubSync(content); break;
+        case 'settings': renderSettings(content); break;
+        default: content.innerHTML = '<div class="dripp-empty"><i class="fas fa-question"></i><p>Unknown section: ' + escapeHtml(section) + '</p></div>';
+      }
+    } catch (err) {
+      console.error('renderSection ' + section + ' failed:', err);
+      content.innerHTML = '<div class="dripp-empty"><i class="fas fa-exclamation-triangle"></i><p><strong>Render error:</strong> ' + escapeHtml(err.message || String(err)) + '</p><button class="dripp-btn" id="retryRenderBtn">Retry</button></div>';
+      const btn = document.getElementById('retryRenderBtn');
+      if (btn) btn.addEventListener('click', () => renderSection(section));
     }
   }
 
@@ -2207,10 +2259,13 @@
     });
     const topTalent = Object.entries(talentTotals).sort((a, b) => b[1] - a[1])[0];
 
+    const models = (state.data && Array.isArray(state.data.models)) ? state.data.models : [];
+    const talentB = (state.data && Array.isArray(state.data.division_b_talent)) ? state.data.division_b_talent : [];
+    const packages = (state.data && Array.isArray(state.data.package_deals)) ? state.data.package_deals : [];
     const allTalent = [
-      ...(state.data.models || []).map(m => ({ name: m.name, division: 'moon' })),
-      ...(state.data.division_b_talent || []).map(m => ({ name: m.name, division: 'ali_hamza' })),
-      ...(state.data.package_deals || []).map(p => ({ name: 'Package: ' + p.title, division: p.division === 'division_b' ? 'ali_hamza' : 'moon' }))
+      ...models.map(m => ({ name: m.name, division: 'moon' })),
+      ...talentB.map(m => ({ name: m.name, division: 'ali_hamza' })),
+      ...packages.map(p => ({ name: 'Package: ' + p.title, division: p.division === 'division_b' ? 'ali_hamza' : 'moon' }))
     ];
 
     root.innerHTML = `
