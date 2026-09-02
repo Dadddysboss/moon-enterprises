@@ -33,3 +33,6 @@ secrets.json
 # Local data dumps
 *.dump
 *.bak
+
+.vercel
+.env*
