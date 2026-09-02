@@ -406,6 +406,12 @@
   "cms_reviews": [],
   "analytics": [
     {
+      "type": "talent-click",
+      "path": "#models",
+      "label": "Kinza",
+      "ts": "2026-09-02T03:06:37.191Z"
+    },
+    {
       "type": "pageview",
       "path": "/",
       "label": "Moon Enterprises | Talent Portfolio",
