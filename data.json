@@ -409,6 +409,12 @@
       "type": "pageview",
       "path": "/",
       "label": "Moon Enterprises | Talent Portfolio",
+      "ts": "2026-09-02T05:10:46.134Z"
+    },
+    {
+      "type": "pageview",
+      "path": "/",
+      "label": "Moon Enterprises | Talent Portfolio",
       "ts": "2026-09-02T03:20:48.246Z"
     },
     {
