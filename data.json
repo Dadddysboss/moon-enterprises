@@ -381,7 +381,25 @@
       "date": "2026-09-01"
     }
   ],
-  "sales": [],
+  "sales": [
+    {
+      "id": "INV-0001-9276",
+      "bookingId": "bk_1788317179275",
+      "clientName": "Muhammad jawad hussain",
+      "clientPhone": "+923158497860",
+      "talentName": "Ali Hamza Bhatti",
+      "amount": 17000,
+      "currency": "PKR",
+      "paymentMethod": "Peng payding (WhatsApp)",
+      "date": "2026-09-02",
+      "dateTime": "2026-09-02T19:45",
+      "division": "ali_hamza",
+      "status": "Paid",
+      "notes": "gal sun ton nivi ty bund uchi kr k",
+      "createdAt": "2026-09-02T02:46:19.276Z",
+      "updatedAt": "2026-09-02T02:49:48.259Z"
+    }
+  ],
   "bookings": [],
   "pending_reviews": [],
   "cms_reviews": [],
