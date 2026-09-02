@@ -689,7 +689,20 @@
   "news": [],
   "bookings": [],
   "sales": [],
-  "pending_reviews": [],
+  "pending_reviews": [
+    {
+      "id": "pub_1788311260288",
+      "name": "Final E2E Test",
+      "comment": "Verifying review submission persists to GitHub",
+      "rating": 5,
+      "date": "2026-09-02",
+      "image": "",
+      "status": "pending",
+      "submittedAt": "2026-09-02T01:07:40.288Z",
+      "division": "division_a",
+      "verified": false
+    }
+  ],
   "site_content": {
     "hero": {
       "title": "Premier Talent Agency",
