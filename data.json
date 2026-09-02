@@ -425,13 +425,13 @@
       "image": "assets/images/maqbool_moon_father.jpg"
     },
     "manager": {
-      "name": "Moon (Muni)",
+      "name": "Moon (Muni Bonda)",
       "title": "Operations Manager & Lead Broker / آپریشنز مینیجر اور لیڈ بروکر",
-      "age": 20,
+      "age": "20",
       "gender": "Trans / ٹرانس",
       "occupation": "Talent Broker / ٹیلنٹ بروکر",
       "pricing": "Starts from 300 PKR up to 12,000 PKR / 300 روپے سے 12,000 روپے تک",
-      "serviceStaffCount": 17,
+      "serviceStaffCount": "17",
       "phone": "+923147553161",
       "image": "assets/images/moon manager.jpeg"
     }
