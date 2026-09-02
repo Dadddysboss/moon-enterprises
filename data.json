@@ -689,7 +689,20 @@
   "news": [],
   "bookings": [],
   "sales": [],
-  "pending_reviews": [],
+  "pending_reviews": [
+    {
+      "id": "pub_1788311473753",
+      "name": "CLI Verify",
+      "comment": "Testing submit-review endpoint",
+      "rating": 5,
+      "date": "2026-09-02",
+      "image": "",
+      "status": "pending",
+      "submittedAt": "2026-09-02T01:11:13.753Z",
+      "division": "division_a",
+      "verified": false
+    }
+  ],
   "site_content": {
     "hero": {
       "title": "Premier Talent Agency",
