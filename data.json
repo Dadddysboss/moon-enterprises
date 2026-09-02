@@ -400,6 +400,12 @@
   "cms_reviews": [],
   "analytics": [
     {
+      "type": "talent-click",
+      "path": "#models",
+      "label": "Ayesha",
+      "ts": "2026-09-02T01:28:41.761Z"
+    },
+    {
       "type": "pageview",
       "path": "/index.html",
       "label": "Moon Enterprises | Talent Portfolio",
