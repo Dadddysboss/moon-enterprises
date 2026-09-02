@@ -4,7 +4,7 @@
       "id": 1,
       "name": "Ayesha",
       "category": "",
-      "specialty": "Bridal Couture & Commercial Shoot / برائیڈل شوٹ اور کمرشل ماڈلنگ",
+      "specialty": "mujra masti + sucker / برائیڈل شوٹ اور کمرشل ماڈلنگ",
       "bio": "Experienced runway and print model specializing in traditional eastern wear. / روایتی مشرقی لباس کی تجربہ کار ماڈل۔",
       "pricing": "PKR 5,000 / Session",
       "image": "assets/images/ayesha.jpg",
@@ -399,24 +399,6 @@
   ],
   "cms_reviews": [],
   "analytics": [
-    {
-      "type": "talent-click",
-      "path": "#models",
-      "label": "Ayesha",
-      "ts": "2026-09-02T01:28:41.761Z"
-    },
-    {
-      "type": "pageview",
-      "path": "/index.html",
-      "label": "Moon Enterprises | Talent Portfolio",
-      "ts": "2026-09-02T01:28:36.594Z"
-    },
-    {
-      "type": "pageview",
-      "path": "/",
-      "label": "Moon Enterprises | Talent Portfolio",
-      "ts": "2026-09-02T01:28:13.184Z"
-    },
     {
       "type": "pageview",
       "path": "/",
