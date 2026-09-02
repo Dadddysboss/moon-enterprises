@@ -283,6 +283,29 @@ module.exports = async (req, res) => {
     return res.status(w.ok ? 200 : 500).json({ ok: w.ok, sale, commit: w.sha });
   }
 
+  // PUBLIC analytics read endpoint (no auth, rate-limited)
+  if (req.method === 'GET' && req.url.startsWith('/api/sync?action=analytics')) {
+    if (isRateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
+    const cur = await readDataJson();
+    if (!cur.data) return res.status(500).json({ error: 'fetch failed' });
+    const events = Array.isArray(cur.data.analytics) ? cur.data.analytics : [];
+    const now = Date.now();
+    const last24h = events.filter(e => now - new Date(e.ts).getTime() < 24 * 60 * 60 * 1000);
+    const last7d = events.filter(e => now - new Date(e.ts).getTime() < 7 * 24 * 60 * 60 * 1000);
+    const pageviews = events.filter(e => e.type === 'pageview' || !e.type);
+    const talentClicks = events.filter(e => e.type === 'talent-click');
+    const pkgViews = events.filter(e => e.type === 'package-view');
+    return res.status(200).json({
+      total: events.length,
+      last24h: last24h.length,
+      last7d: last7d.length,
+      pageviews: pageviews.length,
+      talentClicks: talentClicks.length,
+      packageViews: pkgViews.length,
+      recent: events.slice(0, 50)
+    });
+  }
+
   // ALL other endpoints require admin auth + optimistic locking
   if (!authOk(req)) return res.status(401).json({ error: 'Unauthorized' });
   if (isRateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
@@ -339,28 +362,6 @@ module.exports = async (req, res) => {
     if (cur.sha) await backupCurrentData(cur.data);
     const w = await writeDataJson(cur.data, cur.sha, 'chore(reviews): reject ' + (list[idx] && list[idx].name || body.id));
     return res.status(w.ok ? 200 : 500).json({ ok: w.ok });
-  }
-
-  if (req.method === 'GET' && req.url.startsWith('/api/sync?action=analytics')) {
-    // Public read — analytics are summary stats, not sensitive
-    const cur = await readDataJson();
-    if (!cur.data) return res.status(500).json({ error: 'fetch failed' });
-    const events = Array.isArray(cur.data.analytics) ? cur.data.analytics : [];
-    const now = Date.now();
-    const last24h = events.filter(e => now - new Date(e.ts).getTime() < 24 * 60 * 60 * 1000);
-    const last7d = events.filter(e => now - new Date(e.ts).getTime() < 7 * 24 * 60 * 60 * 1000);
-    const pageviews = events.filter(e => e.type === 'pageview' || !e.type);
-    const talentClicks = events.filter(e => e.type === 'talent-click');
-    const pkgViews = events.filter(e => e.type === 'package-view');
-    return res.status(200).json({
-      total: events.length,
-      last24h: last24h.length,
-      last7d: last7d.length,
-      pageviews: pageviews.length,
-      talentClicks: talentClicks.length,
-      packageViews: pkgViews.length,
-      recent: events.slice(0, 50)
-    });
   }
 
   return res.status(404).json({ error: 'Unknown action' });
