@@ -406,6 +406,12 @@
   "cms_reviews": [],
   "analytics": [
     {
+      "type": "pageview",
+      "path": "/",
+      "label": "Moon Enterprises | Talent Portfolio",
+      "ts": "2026-09-02T03:20:48.246Z"
+    },
+    {
       "type": "talent-click",
       "path": "#division-b",
       "label": "Adan",
