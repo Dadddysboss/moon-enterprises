@@ -400,6 +400,12 @@
   "cms_reviews": [],
   "analytics": [
     {
+      "type": "pageview",
+      "path": "/test-final",
+      "label": "CLI verification",
+      "ts": "2026-09-02T02:36:15.806Z"
+    },
+    {
       "type": "talent-click",
       "path": "#models",
       "label": "CLI Verify Test",
