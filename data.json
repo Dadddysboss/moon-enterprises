@@ -400,6 +400,12 @@
   "cms_reviews": [],
   "analytics": [
     {
+      "type": "talent-click",
+      "path": "#models",
+      "label": "CLI Verify Test",
+      "ts": "2026-09-02T02:17:12.064Z"
+    },
+    {
       "type": "pageview",
       "path": "/index.html",
       "label": "Moon Enterprises | Talent Portfolio",
