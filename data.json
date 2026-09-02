@@ -383,106 +383,9 @@
   ],
   "sales": [],
   "bookings": [],
-  "pending_reviews": [
-    {
-      "id": "pub_1788311473753",
-      "name": "CLI Verify",
-      "comment": "Testing submit-review endpoint",
-      "rating": 5,
-      "date": "2026-09-02",
-      "image": "",
-      "status": "pending",
-      "submittedAt": "2026-09-02T01:11:13.753Z",
-      "division": "division_a",
-      "verified": false
-    }
-  ],
+  "pending_reviews": [],
   "cms_reviews": [],
   "analytics": [
-    {
-      "type": "pageview",
-      "path": "/test-final",
-      "label": "CLI verification",
-      "ts": "2026-09-02T02:36:15.806Z"
-    },
-    {
-      "type": "talent-click",
-      "path": "#models",
-      "label": "CLI Verify Test",
-      "ts": "2026-09-02T02:17:12.064Z"
-    },
-    {
-      "type": "pageview",
-      "path": "/index.html",
-      "label": "Moon Enterprises | Talent Portfolio",
-      "ts": "2026-09-02T01:48:42.144Z"
-    },
-    {
-      "type": "talent-click",
-      "path": "#models",
-      "label": "Mia Malkova",
-      "ts": "2026-09-02T01:44:19.009Z"
-    },
-    {
-      "type": "pageview",
-      "path": "/index.html",
-      "label": "Moon Enterprises | Talent Portfolio",
-      "ts": "2026-09-02T01:44:03.980Z"
-    },
-    {
-      "type": "pageview",
-      "path": "/index.html",
-      "label": "Moon Enterprises | Talent Portfolio",
-      "ts": "2026-09-02T01:41:01.391Z"
-    },
-    {
-      "type": "pageview",
-      "path": "/index.html",
-      "label": "Moon Enterprises | Talent Portfolio",
-      "ts": "2026-09-02T01:40:16.155Z"
-    },
-    {
-      "type": "pageview",
-      "path": "/index.html",
-      "label": "Moon Enterprises | Talent Portfolio",
-      "ts": "2026-09-02T01:39:51.104Z"
-    },
-    {
-      "type": "pageview",
-      "path": "/index.html",
-      "label": "Moon Enterprises | Talent Portfolio",
-      "ts": "2026-09-02T01:39:30.412Z"
-    },
-    {
-      "type": "pageview",
-      "path": "/index.html",
-      "label": "Moon Enterprises | Talent Portfolio",
-      "ts": "2026-09-02T01:39:22.577Z"
-    },
-    {
-      "type": "talent-click",
-      "path": "#models",
-      "label": "Malaika",
-      "ts": "2026-09-02T01:34:32.038Z"
-    },
-    {
-      "type": "talent-click",
-      "path": "#models",
-      "label": "Kinza",
-      "ts": "2026-09-02T01:34:24.534Z"
-    },
-    {
-      "type": "talent-click",
-      "path": "#models",
-      "label": "Ayesha",
-      "ts": "2026-09-02T01:34:12.414Z"
-    },
-    {
-      "type": "pageview",
-      "path": "/index.html",
-      "label": "Moon Enterprises | Talent Portfolio",
-      "ts": "2026-09-02T01:30:42.457Z"
-    },
     {
       "type": "pageview",
       "path": "/",
@@ -808,7 +711,7 @@
   },
   "site_content": {
     "hero": {
-      "title": "Premier Talent Agency",
+      "title": "Senior Hammad Dhariwal",
       "titleUr": "پریمیئر ٹیلنٹ ایجنسی",
       "subtitle": "Connecting exceptional talent with world-class opportunities",
       "subtitleUr": "بہترین ٹیلنٹ کو عالمی معیار کے مواقع سے جوڑنا",
