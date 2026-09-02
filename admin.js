@@ -1606,7 +1606,8 @@
         id: 'division_b', name: 'Ali Hamza Division', key: 'ali_hamza'
       };
       saveData();
-      showToast('Contact info saved. (Export data.json to deploy.)', 'success');
+      commitAndToast('chore(cms): update contact info (agency + divisions)');
+      showToast('Contact info saved. Pushing to GitHub…', 'success');
     });
   }
 
@@ -1962,7 +1963,8 @@
         badge: String(fd.get('badge') || '').trim()
       };
       saveData();
-      showToast('Hero text saved. (Export data.json + GitHub Sync to deploy.)', 'success');
+      commitAndToast('chore(cms): update hero text → ' + (state.data.site_content.hero.title || '(untitled)'));
+      showToast('Hero text saved. Pushing to GitHub…', 'success');
     });
 
     $('#saveContactTextBtn', root).addEventListener('click', () => {
@@ -1977,7 +1979,8 @@
         footer_copyright: String(fd.get('footer_copyright') || '').trim()
       };
       saveData();
-      showToast('Contact & footer saved. (Export data.json + GitHub Sync to deploy.)', 'success');
+      commitAndToast('chore(cms): update contact & footer text');
+      showToast('Contact & footer saved. Pushing to GitHub…', 'success');
     });
   }
 
