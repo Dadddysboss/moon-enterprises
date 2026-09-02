@@ -710,5 +710,13 @@
       "footer_copyright": "© 2026 Moon Enterprises. All rights reserved."
     }
   },
-  "cms_reviews": []
+  "cms_reviews": [],
+  "analytics": [
+    {
+      "type": "pageview",
+      "path": "/",
+      "label": "",
+      "ts": "2026-09-02T01:10:51.532Z"
+    }
+  ]
 }
