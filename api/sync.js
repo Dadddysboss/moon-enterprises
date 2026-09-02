@@ -98,8 +98,15 @@ async function readDataJson() {
   const owner = process.env.GITHUB_USER;
   const repo = process.env.GITHUB_REPO;
   const branch = process.env.GITHUB_BRANCH || 'main';
+  // If GitHub creds are missing, fall back to the static data.json shipped with the deploy
+  if (!owner || !repo || !process.env.GITHUB_TOKEN) {
+    return await readStaticDataJson();
+  }
   const getRes = await gh('GET', `/repos/${owner}/${repo}/contents/data.json?ref=${encodeURIComponent(branch)}`);
-  if (!getRes.ok) return { data: null, sha: null, error: getRes.error };
+  if (!getRes.ok) {
+    // Fallback to the static file shipped with the deploy (no sha available)
+    return await readStaticDataJson();
+  }
   if (getRes.status === 404) return { data: defaultData(), sha: null };
   let decoded = '';
   try { decoded = Buffer.from(getRes.data.content, 'base64').toString('utf-8'); } catch (e) {}
@@ -107,6 +114,18 @@ async function readDataJson() {
     return { data: JSON.parse(decoded), sha: getRes.data.sha };
   } catch (e) {
     return { data: defaultData(), sha: getRes.data.sha };
+  }
+}
+
+async function readStaticDataJson() {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(process.cwd(), 'data.json');
+    const text = fs.readFileSync(filePath, 'utf-8');
+    return { data: JSON.parse(text), sha: null };
+  } catch (e) {
+    return { data: defaultData(), sha: null, error: 'static read failed: ' + e.message };
   }
 }
 
