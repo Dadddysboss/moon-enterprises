@@ -6,7 +6,7 @@
 const GITHUB_API = 'https://api.github.com';
 const ADMIN_USER = 'hammad';
 // SHA-256 of "phuddi da"
-const ADMIN_PASS_HASH = 'f8a3b3e1b9a04f61c2a18a0c4f63d1b85b6e3a44f3c0c8f7c3a3d2e5f8b9a0c1';
+const ADMIN_PASS_HASH = '44c0336486df4ecb6cef6e7903edc2f2d868d9bb0c5a238988aefd7c511d5be5';
 
 const RATE = new Map();
 const RATE_WINDOW = 15 * 60 * 1000;
