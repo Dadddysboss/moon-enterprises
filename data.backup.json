@@ -1,0 +1,727 @@
+{
+  "agency": {
+    "title": "Moon Enterprises",
+    "contactPhone": "+923147553161",
+    "whatsappNumber": "923147553161"
+  },
+  "divisions": {
+    "division_a": {
+      "id": "division_a",
+      "name": "Moon Division",
+      "key": "moon",
+      "whatsappNumber": "923147553161",
+      "contactPhone": "+923147553161"
+    },
+    "division_b": {
+      "id": "division_b",
+      "name": "Ali Hamza Division",
+      "key": "ali_hamza",
+      "whatsappNumber": "923036800682",
+      "contactPhone": "+923036800682"
+    }
+  },
+  "leadership": {
+    "ceo": {
+      "name": "Maqbool (Phuddi da)",
+      "title": "Agency Founder & CEO / ایجنسی بانی اور سی ای او",
+      "age": 57,
+      "gender": "Male (Identifies as Woman) / مرد (عورت کی شناخت)",
+      "occupation": "Businesswoman / کاروباری خاتون",
+      "pricing": "Contact Manager for Retainer Fees / ریٹینر فیس کے لیے مینیجر سے رابطہ کریں",
+      "image": "assets/images/maqbool_moon_father.jpg"
+    },
+    "manager": {
+      "name": "Moon (Muni)",
+      "title": "Operations Manager & Lead Broker / آپریشنز مینیجر اور لیڈ بروکر",
+      "age": 20,
+      "gender": "Trans / ٹرانس",
+      "occupation": "Talent Broker / ٹیلنٹ بروکر",
+      "pricing": "Starts from 300 PKR up to 12,000 PKR / 300 روپے سے 12,000 روپے تک",
+      "serviceStaffCount": 17,
+      "phone": "+923147553161",
+      "image": "assets/images/moon manager.jpeg"
+    }
+  },
+  "models": [
+    {
+      "id": 1,
+      "name": "Ayesha",
+      "specialty": "Bridal Couture & Commercial Shoot / برائیڈل شوٹ اور کمرشل ماڈلنگ",
+      "bio": "Experienced runway and print model specializing in traditional eastern wear. / روایتی مشرقی لباس کی تجربہ کار ماڈل۔",
+      "pricing": "PKR 5,000 / Session",
+      "image": "assets/images/ayesha.jpg",
+      "height": "5'6\"",
+      "weight": "52 kg",
+      "waist": "28\"",
+      "age": 24,
+      "occupation": "Runway & Print Model",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": 2,
+      "name": "Kinza",
+      "specialty": "Fashion Runway & Brand Ambassadorship / فیشن رن وے اور برانڈ سفیر",
+      "bio": "High-fashion model with experience in seasonal lawn campaigns. / سیزنل لان مہمات کا وسیع تجربہ۔",
+      "pricing": "PKR 6,000 / Session",
+      "image": "assets/images/kinza.jpg",
+      "height": "5'8\"",
+      "weight": "54 kg",
+      "waist": "27\"",
+      "age": 22,
+      "occupation": "Fashion Runway Model",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": 3,
+      "name": "Kainat",
+      "specialty": "Casual Wear & Product Photography / کیژول ویئر اور پروڈکٹ فوٹوگرافی",
+      "bio": "Versatile digital creator focused on e-commerce product shoots. / ای کامرس پروڈکٹ شوٹس کی ماہر۔",
+      "pricing": "PKR 4,500 / Session",
+      "image": "assets/images/kainat.jpg",
+      "height": "5'5\"",
+      "weight": "50 kg",
+      "waist": "26\"",
+      "age": 23,
+      "occupation": "Digital Creator",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": 4,
+      "name": "Malaika",
+      "specialty": "High-End Editorial & Luxury Jewelry / ہائی اینڈ ایڈیٹوریل اور جیولری شوٹ",
+      "bio": "Editorial model featured in national style and fashion magazines. / قومی فیشن میگزینز میں نمایاں۔",
+      "pricing": "PKR 7,000 / Session",
+      "image": "assets/images/malaika_a.svg",
+      "height": "5'7\"",
+      "weight": "53 kg",
+      "waist": "27\"",
+      "age": 25,
+      "occupation": "Editorial Model",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": 5,
+      "name": "Peeno",
+      "specialty": "Event Hosting & Promotional Modeling / ایونٹ ہوسٹنگ اور پروموشنل ماڈلنگ",
+      "bio": "Energetic brand ambassador for corporate expos and launch events. / کارپوریٹ ایونٹس کی برانڈ سفیر۔",
+      "pricing": "PKR 3,000 / Session",
+      "image": "assets/images/peeno.jpg",
+      "height": "5'4\"",
+      "weight": "48 kg",
+      "waist": "26\"",
+      "age": 21,
+      "occupation": "Event Host",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": 6,
+      "name": "Bushra",
+      "specialty": "Digital Ads & Video Commercials / ڈیجیٹل اشتہارات اور ویڈیو کمرشلز",
+      "bio": "Actor and commercial model appearing in social media ad campaigns. / سوشل میڈیا مہمات کی ایکٹر اور ماڈل۔",
+      "pricing": "PKR 5,500 / Session",
+      "image": "assets/images/bushra.jpg",
+      "height": "5'6\"",
+      "weight": "51 kg",
+      "waist": "27\"",
+      "age": 24,
+      "occupation": "Commercial Actor",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": 7,
+      "name": "Chanda",
+      "specialty": "Catalog & Social Media Influencer / کیٹلاگ اور سوشل میڈیا انفلوئنسر",
+      "bio": "Content producer specialized in apparel lookbooks and short video clips. / کپڑوں کے لک بکس کی ماہر۔",
+      "pricing": "PKR 4,000 / Session",
+      "image": "assets/images/chanda.jpg",
+      "height": "5'5\"",
+      "weight": "49 kg",
+      "waist": "26\"",
+      "age": 22,
+      "occupation": "Influencer",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": 8,
+      "name": "Dani Daniels",
+      "specialty": "International Print & Runway / انٹرنیشنل پرنٹ اور رن وے",
+      "bio": "Senior fashion model available for global promotional tours and events. / بین الاقوامی مہمات کی سینئر ماڈل۔",
+      "pricing": "PKR 10,000 / Session",
+      "image": "assets/images/dani_daniels.jpg",
+      "height": "5'9\"",
+      "weight": "55 kg",
+      "waist": "28\"",
+      "age": 27,
+      "occupation": "International Model",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": 9,
+      "name": "Mia Khalifa",
+      "specialty": "Celebrity Appearance & Media Guesting / سیلیبریٹی اپیرنس اور میڈیا گیسٹنگ",
+      "bio": "Public figure available for brand endorsements and VIP launch presence. / برانڈ اینڈورسمنٹ کے لیے پبلک فگر۔",
+      "pricing": "PKR 12,000 / Session",
+      "image": "assets/images/mia_khalifa.jpg",
+      "height": "5'7\"",
+      "weight": "54 kg",
+      "waist": "28\"",
+      "age": 26,
+      "occupation": "Public Figure",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": 10,
+      "name": "Mia Malkova",
+      "specialty": "Luxury Brand & Creative Direction / لکژری برانڈ اور کریٹو ڈائریکشن",
+      "bio": "Creative consultant and model specializing in high-concept fashion shoots. / ہائی کنسیپٹ فیشن شوٹس کی ماہر۔",
+      "pricing": "PKR 11,000 / Session",
+      "image": "assets/images/mia_malkova.jpg",
+      "height": "5'8\"",
+      "weight": "55 kg",
+      "waist": "28\"",
+      "age": 28,
+      "occupation": "Creative Director",
+      "location": "Old Mandi Pattoki"
+    }
+  ],
+  "division_b_leadership": {
+    "manager": {
+      "name": "Ali Hamza Bhatti",
+      "title": "Commercial & Event Talent Division Head / کمرشل اور ایونٹ ٹیلنٹ ڈویژن ہیڈ",
+      "age": 19,
+      "gender": "Male / مرد",
+      "occupation": "Talent Coordinator & Event Manager / ٹیلنٹ کوآرڈینیٹر اور ایونٹ مینیجر",
+      "pricing": "Starts from 5,000 PKR up to 20,000 PKR / 5,000 سے 20,000 روپے تک",
+      "phone": "+923036800682",
+      "whatsappNumber": "923036800682",
+      "image": "assets/images/ali_hamza.png"
+    }
+  },
+  "division_b_talent": [
+    {
+      "id": "b1",
+      "name": "Adan",
+      "category": "Stage Performance & Dance",
+      "specialty": "Choreographed Event Dancing & Stage Shows / کوریوگرافڈ ایونٹ ڈانس اور اسٹیج شوز",
+      "bio": "Specialized stage dancer and performance artist for corporate galas and wedding events. / کارپوریٹ گالا اور شادی کی تقریبات کے لیے خصوصی اسٹیج ڈانسر۔",
+      "pricing": "PKR 8,000 / Event",
+      "image": "assets/images/adan.jpg",
+      "height": "5'6\"",
+      "weight": "52 kg",
+      "waist": "27\"",
+      "age": 22,
+      "occupation": "Stage Performer",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": "b2",
+      "name": "Nimra",
+      "category": "Event Hosting & Media",
+      "specialty": "Red Carpet Hosting & VIP Greeting / ریڈ کارپیٹ ہوسٹنگ اور وی آئی پی استقبال",
+      "bio": "Experienced anchor and host for high-profile brand launches and commercial exhibitions. / بڑے برانڈ لانچ اور کمرشل نمائشوں کی تجربہ کار اینکر۔",
+      "pricing": "PKR 7,500 / Session",
+      "image": "assets/images/nimra.jpg",
+      "height": "5'5\"",
+      "weight": "50 kg",
+      "waist": "26\"",
+      "age": 24,
+      "occupation": "Event Host",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": "b3",
+      "name": "Maria",
+      "category": "Commercial Shoot",
+      "specialty": "Traditional Wear & Bridal Catalog / روایتی لباس اور برائیڈل کیٹلاگ",
+      "bio": "Print catalog model for boutique apparel brands. / بوتیک ایپریل برانڈز کی پرنٹ کیٹلاگ ماڈل۔",
+      "pricing": "PKR 6,000 / Session",
+      "image": "assets/images/maria.jpg",
+      "height": "5'4\"",
+      "weight": "49 kg",
+      "waist": "26\"",
+      "age": 21,
+      "occupation": "Catalog Model",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": "b4",
+      "name": "Aleesha",
+      "category": "Stage Performance & Dance",
+      "specialty": "Cultural & Contemporary Dance Performance / ثقافتی اور جدید رقص کی پرفارمنس",
+      "bio": "Professional troupe dancer for large-scale stage productions. / بڑے اسٹیج پروڈکشنز کی پیشہ ور ٹروپ ڈانسر۔",
+      "pricing": "PKR 9,000 / Event",
+      "image": "assets/images/aleesha.jpg",
+      "height": "5'7\"",
+      "weight": "54 kg",
+      "waist": "28\"",
+      "age": 23,
+      "occupation": "Troupe Dancer",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": "b5",
+      "name": "Hania",
+      "category": "Brand Escort & Ushering",
+      "specialty": "VIP Protocol & Event Ushering / وی آئی پی پروٹوکول اور ایونٹ اشرنگ",
+      "bio": "Lead usher and brand ambassador for high-end expos and corporate dinners. / ہائی اینڈ ایکسپوز اور کارپوریٹ ڈنرز کی لیڈ اشر۔",
+      "pricing": "PKR 5,000 / Event",
+      "image": "assets/images/hania.jpg",
+      "height": "5'6\"",
+      "weight": "52 kg",
+      "waist": "27\"",
+      "age": 22,
+      "occupation": "Brand Ambassador",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": "b6",
+      "name": "Joiya Brand",
+      "category": "Commercial Shoot",
+      "specialty": "Footwear & Accessories Shoot / فوٹویئر اور ایکسیسریز شوٹ",
+      "bio": "Commercial print model for regional footwear and accessory brands. / علاقائی فوٹویئر اور ایکسیسریز برانڈز کی کمرشل ماڈل۔",
+      "pricing": "PKR 6,500 / Session",
+      "image": "assets/images/joiya_brand.jpg",
+      "height": "5'5\"",
+      "weight": "50 kg",
+      "waist": "26\"",
+      "age": 23,
+      "occupation": "Print Model",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": "b7",
+      "name": "Nadia",
+      "category": "Event Hosting & Media",
+      "specialty": "Live Streaming & Product Demos / لائیو اسٹریمنگ اور پروڈکٹ ڈیمو",
+      "bio": "Digital presenter specializing in live e-commerce product demonstrations. / لائیو ای کامرس ڈیمو کی ڈیجیٹل پریزنٹر۔",
+      "pricing": "PKR 5,500 / Session",
+      "image": "assets/images/nadia.jpg",
+      "height": "5'4\"",
+      "weight": "48 kg",
+      "waist": "26\"",
+      "age": 24,
+      "occupation": "Digital Presenter",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": "b8",
+      "name": "Malaika B",
+      "category": "Stage Performance & Dance",
+      "specialty": "Musical Night Performance / میوزیکل نائٹ پرفارمنس",
+      "bio": "Stage performer for musical night shows and cultural festivals. / میوزیکل نائٹ شوز اور ثقافتی میلوں کی اسٹیج پرفارمر۔",
+      "pricing": "PKR 8,500 / Event",
+      "image": "assets/images/malaika.jpg",
+      "height": "5'6\"",
+      "weight": "53 kg",
+      "waist": "27\"",
+      "age": 22,
+      "occupation": "Stage Performer",
+      "location": "Old Mandi Pattoki"
+    },
+    {
+      "id": "b9",
+      "name": "Urwa",
+      "category": "Brand Escort & Ushering",
+      "specialty": "Corporate Guest Relations / کارپوریٹ گیسٹ ریلیشنز",
+      "bio": "Protocol officer and hospitality model for international delegation events. / بین الاقوامی وفود کی تقریبات کی پروٹوکول آفیسر۔",
+      "pricing": "PKR 7,000 / Event",
+      "image": "assets/images/urwa.jpg",
+      "height": "5'7\"",
+      "weight": "54 kg",
+      "waist": "27\"",
+      "age": 25,
+      "occupation": "Protocol Officer",
+      "location": "Old Mandi Pattoki"
+    }
+  ],
+  "package_deals": [
+    {
+      "id": "deal_1",
+      "division": "division_a",
+      "title": "Dual Bridal Shoot Package",
+      "titleUr": "ڈوئل برائیڈل شوٹ پیکج",
+      "description": "Book 2 Models (Ayesha & Kinza) for a full-day bridal campaign shoot. / ایک پورے دن کی برائیڈل مہم کے لیے 2 ماڈلز (عائشہ اور کنزا) بک کریں۔",
+      "originalPrice": "11,000 PKR",
+      "discountedPrice": "8,500 PKR",
+      "collageImages": [
+        "assets/images/ayesha.jpg",
+        "assets/images/kinza.jpg"
+      ],
+      "targetManager": "moon",
+      "badge": "Best Value"
+    },
+    {
+      "id": "deal_2",
+      "division": "division_b",
+      "title": "Weekend Stage Duo Deal (Sat-Sun Special)",
+      "titleUr": "ویک اینڈ اسٹیج ڈیو ڈیل (ہفتہ-اتوار خصوصی)",
+      "description": "Exclusive weekend discount for 2 performance artists (Adan & Aleesha). / 2 پرفارمنس آرٹسٹس (عدن اور عائشہ) کے لیے خصوصی ویک اینڈ ڈسکاؤنٹ۔",
+      "originalPrice": "17,000 PKR",
+      "discountedPrice": "13,000 PKR",
+      "collageImages": [
+        "assets/images/adan.jpg",
+        "assets/images/aleesha.jpg"
+      ],
+      "targetManager": "ali_hamza",
+      "badge": "Weekend Only"
+    },
+    {
+      "id": "deal_3",
+      "division": "division_a",
+      "title": "E-Commerce Catalog Trio",
+      "titleUr": "ای کامرس کیٹلاگ ٹریو",
+      "description": "Bundle package featuring 3 commercial models for product cataloging. / پروڈکٹ کیٹلاگنگ کے لیے 3 کمرشل ماڈلز کا بنڈل پیکج۔",
+      "originalPrice": "16,000 PKR",
+      "discountedPrice": "12,000 PKR",
+      "collageImages": [
+        "assets/images/kainat.jpg",
+        "assets/images/maria.jpg"
+      ],
+      "targetManager": "moon",
+      "badge": "Hot Deal"
+    },
+    {
+      "id": "deal_4",
+      "division": "division_b",
+      "title": "Corporate Gala Hosting & Ushering",
+      "titleUr": "کارپوریٹ گالا ہوسٹنگ اور اشرنگ",
+      "description": "Full event coverage with Lead Host & 2 VIP Ushers. / لیڈ میزبان اور 2 وی آئی پی اشرز کے ساتھ مکمل ایونٹ کوریج۔",
+      "originalPrice": "20,000 PKR",
+      "discountedPrice": "15,000 PKR",
+      "collageImages": [
+        "assets/images/nimra.jpg",
+        "assets/images/hania.jpg"
+      ],
+      "targetManager": "ali_hamza",
+      "badge": "Premium"
+    },
+    {
+      "id": "deal_5",
+      "division": "division_a",
+      "title": "Luxury Editorial Combo",
+      "titleUr": "لکژری ایڈیٹوریل کومبو",
+      "description": "High-end fashion editorial shoot with top-tier international models. / ٹاپ ٹیئر بین الاقوامی ماڈلز کے ساتھ ہائی اینڈ فیشن ایڈیٹوریل شوٹ۔",
+      "originalPrice": "22,000 PKR",
+      "discountedPrice": "17,500 PKR",
+      "collageImages": [
+        "assets/images/dani_daniels.jpg",
+        "assets/images/mia_khalifa.jpg"
+      ],
+      "targetManager": "moon",
+      "badge": "Editor's Pick"
+    },
+    {
+      "id": "deal_6",
+      "division": "division_b",
+      "title": "Sunday Mega Event Fest Deal",
+      "titleUr": "سندھی میگا ایونٹ فیسٹ ڈیل",
+      "description": "Complete stage choreography and event hosting team for Sunday night expos. / اتوار رات ایکسپوز کے لیے مکمل اسٹیج کوریوگرافی اور ایونٹ ہوسٹنگ ٹیم۔",
+      "originalPrice": "25,000 PKR",
+      "discountedPrice": "19,000 PKR",
+      "collageImages": [
+        "assets/images/malaika.jpg",
+        "assets/images/urwa.jpg"
+      ],
+      "targetManager": "ali_hamza",
+      "badge": "Limited"
+    }
+  ],
+  "reviews": {
+    "division_a": [
+      {
+        "id": "r1",
+        "name": "Sara Khan",
+        "rating": 5,
+        "comment": "Outstanding professionalism! The team delivered exactly what was promised.",
+        "commentUr": "بے عیب پیشہ ورانہ خدمات! ٹیم نے بالکل وہی فراہم کیا جو وعدہ کیا تھا۔",
+        "date": "2026-08-12",
+        "verified": true
+      },
+      {
+        "id": "r2",
+        "name": "Ahmad Raza",
+        "rating": 5,
+        "comment": "Booked Ayesha for our bridal shoot — incredible results and punctual delivery.",
+        "commentUr": "ہمارے برائیڈل شوٹ کے لیے عائشہ کو بک کیا — شاندار نتائج اور وقت پر ترسیل۔",
+        "date": "2026-07-28",
+        "verified": true
+      },
+      {
+        "id": "r3",
+        "name": "Fatima Ali",
+        "rating": 4,
+        "comment": "Great experience overall, will book again for our next campaign.",
+        "commentUr": "مجموعی طور پر بہترین تجربہ، اگلی مہم کے لیے دوبارہ بک کریں گے۔",
+        "date": "2026-07-15",
+        "verified": true
+      }
+    ],
+    "division_b": [
+      {
+        "id": "br1",
+        "name": "Bilal Ahmed",
+        "rating": 5,
+        "comment": "Hired Adan & Aleesha for our wedding sangeet — the crowd loved every minute!",
+        "commentUr": "ہماری شادی کی سندھی کے لیے عدن اور عائشہ کو بک کیا — ہر لمحہ بھرپور تھا!",
+        "date": "2026-08-20",
+        "verified": true
+      },
+      {
+        "id": "br2",
+        "name": "Hina Malik",
+        "rating": 5,
+        "comment": "Nimra hosted our product launch flawlessly. Highly recommended for corporate events.",
+        "commentUr": "نمرا نے ہمارے پروڈکٹ لانچ کی میزبانی بے عیب انداز میں کی۔ کارپوریٹ ایونٹس کے لیے انتہائی سفارش کی جاتی ہے۔",
+        "date": "2026-08-05",
+        "verified": true
+      },
+      {
+        "id": "br3",
+        "name": "Talha Sheikh",
+        "rating": 4,
+        "comment": "Hania was a perfect brand ambassador for our expo. Professional and punctual.",
+        "commentUr": "ہانیہ ہمارے ایکسپوز کے لیے بہترین برانڈ سفیر تھیں۔ پیشہ ور اور وقت پر۔",
+        "date": "2026-07-22",
+        "verified": true
+      }
+    ]
+  },
+  "model_reviews": {
+    "1": [
+      {
+        "id": "mr_1_1",
+        "name": "Zara M.",
+        "rating": 5,
+        "comment": "Ayesha was punctual and her bridal poses were stunning. Highly recommended for desi couture!",
+        "date": "2026-08-10",
+        "verified": true
+      },
+      {
+        "id": "mr_1_2",
+        "name": "Ali T.",
+        "rating": 4,
+        "comment": "Great energy on set. Brought her own portfolio and nailed every shot.",
+        "date": "2026-07-22",
+        "verified": true
+      }
+    ],
+    "2": [
+      {
+        "id": "mr_2_1",
+        "name": "Sana K.",
+        "rating": 5,
+        "comment": "Kinza carries the lawn campaign like a pro. Editorial-grade delivery.",
+        "date": "2026-08-05",
+        "verified": true
+      }
+    ],
+    "3": [
+      {
+        "id": "mr_3_1",
+        "name": "Bilal R.",
+        "rating": 5,
+        "comment": "Kainat is a delight on e-commerce sets. Fast learner and consistent.",
+        "date": "2026-08-15",
+        "verified": true
+      }
+    ],
+    "4": [
+      {
+        "id": "mr_4_1",
+        "name": "Hina A.",
+        "rating": 4,
+        "comment": "Malaika has a striking editorial look — perfect for high-end magazines.",
+        "date": "2026-07-30",
+        "verified": true
+      }
+    ],
+    "5": [
+      {
+        "id": "mr_5_1",
+        "name": "Omar S.",
+        "rating": 5,
+        "comment": "Peeno lit up our corporate expo. Guests loved her energy.",
+        "date": "2026-08-01",
+        "verified": true
+      }
+    ],
+    "6": [
+      {
+        "id": "mr_6_1",
+        "name": "Mahnoor F.",
+        "rating": 5,
+        "comment": "Bushra delivered our video commercial in one take. Incredible professionalism.",
+        "date": "2026-07-18",
+        "verified": true
+      }
+    ],
+    "7": [
+      {
+        "id": "mr_7_1",
+        "name": "Faisal M.",
+        "rating": 4,
+        "comment": "Chanda created beautiful lookbook content for our boutique launch.",
+        "date": "2026-08-08",
+        "verified": true
+      }
+    ],
+    "8": [
+      {
+        "id": "mr_8_1",
+        "name": "International Brand Team",
+        "rating": 5,
+        "comment": "Dani Daniels brought global-tier runway presence to our international event.",
+        "date": "2026-07-12",
+        "verified": true
+      }
+    ],
+    "9": [
+      {
+        "id": "mr_9_1",
+        "name": "VIP Launch Organizer",
+        "rating": 5,
+        "comment": "Mia Khalifa was the highlight of our VIP launch night. Flawless media presence.",
+        "date": "2026-06-28",
+        "verified": true
+      }
+    ],
+    "10": [
+      {
+        "id": "mr_10_1",
+        "name": "Luxury Fashion House",
+        "rating": 5,
+        "comment": "Mia Malkova elevated our creative direction with high-concept visual language.",
+        "date": "2026-07-04",
+        "verified": true
+      }
+    ],
+    "b1": [
+      {
+        "id": "mr_b1_1",
+        "name": "Wedding Client",
+        "rating": 5,
+        "comment": "Adan owned the stage at our sangeet night. Choreography was fire!",
+        "date": "2026-08-19",
+        "verified": true
+      }
+    ],
+    "b2": [
+      {
+        "id": "mr_b2_1",
+        "name": "Brand Manager",
+        "rating": 5,
+        "comment": "Nimra hosted our product launch with poise. Spoke fluently in English and Urdu.",
+        "date": "2026-08-04",
+        "verified": true
+      }
+    ],
+    "b3": [
+      {
+        "id": "mr_b3_1",
+        "name": "Boutique Owner",
+        "rating": 4,
+        "comment": "Maria was punctual and delivered the bridal catalog on time. Very photogenic.",
+        "date": "2026-07-25",
+        "verified": true
+      }
+    ],
+    "b4": [
+      {
+        "id": "mr_b4_1",
+        "name": "Event Producer",
+        "rating": 5,
+        "comment": "Aleesha is a stunning contemporary dancer — commanded the entire stage.",
+        "date": "2026-08-12",
+        "verified": true
+      }
+    ],
+    "b5": [
+      {
+        "id": "mr_b5_1",
+        "name": "Expo Coordinator",
+        "rating": 5,
+        "comment": "Hania was a professional VIP usher. Made our high-end guests feel welcome.",
+        "date": "2026-07-20",
+        "verified": true
+      }
+    ],
+    "b6": [
+      {
+        "id": "mr_b6_1",
+        "name": "Footwear Brand",
+        "rating": 4,
+        "comment": "Joiya Brand delivered consistent print shots for our accessories line.",
+        "date": "2026-08-02",
+        "verified": true
+      }
+    ],
+    "b7": [
+      {
+        "id": "mr_b7_1",
+        "name": "E-Commerce Manager",
+        "rating": 5,
+        "comment": "Nadia hosted a flawless live demo. Drove 3x our usual conversion!",
+        "date": "2026-08-14",
+        "verified": true
+      }
+    ],
+    "b8": [
+      {
+        "id": "mr_b8_1",
+        "name": "Cultural Fest Organizer",
+        "rating": 5,
+        "comment": "Malaika B lit up our musical night. Authentic stage performer.",
+        "date": "2026-08-21",
+        "verified": true
+      }
+    ],
+    "b9": [
+      {
+        "id": "mr_b9_1",
+        "name": "Diplomatic Event Lead",
+        "rating": 5,
+        "comment": "Urwa handled international guests with grace. Truly professional protocol officer.",
+        "date": "2026-07-28",
+        "verified": true
+      }
+    ]
+  },
+  "news": [],
+  "bookings": [],
+  "sales": [],
+  "pending_reviews": [
+    {
+      "id": "pub_1788311260288",
+      "name": "Final E2E Test",
+      "comment": "Verifying review submission persists to GitHub",
+      "rating": 5,
+      "date": "2026-09-02",
+      "image": "",
+      "status": "pending",
+      "submittedAt": "2026-09-02T01:07:40.288Z",
+      "division": "division_a",
+      "verified": false
+    }
+  ],
+  "site_content": {
+    "hero": {
+      "title": "Premier Talent Agency",
+      "titleUr": "پریمیئر ٹیلنٹ ایجنسی",
+      "subtitle": "Connecting exceptional talent with world-class opportunities",
+      "subtitleUr": "بہترین ٹیلنٹ کو عالمی معیار کے مواقع سے جوڑنا",
+      "cta": "View Our Talent",
+      "ctaUr": "ہماری ٹیلنٹ دیکھیں",
+      "badge": "Est. 2026"
+    },
+    "contact": {
+      "address": "Old Mandi Pattoki, Punjab, Pakistan",
+      "addressUr": "اولڈ منڈی پتوکی، پنجاب، پاکستان",
+      "leadership_blurb": "The team delivering world-class talent to brands, agencies, and event organizers.",
+      "leadership_blurbUr": "برانڈز، ایجنسیوں اور ایونٹ آرگنائزرز کو عالمی معیار کا ٹیلنٹ فراہم کرنے والی ٹیم۔",
+      "footer_tagline": "Empowering talent, delivering excellence",
+      "footer_taglineUr": "ٹیلنٹ کو بااختیار بنانا، بہترین خدمات فراہم کرنا",
+      "footer_copyright": "© 2026 Moon Enterprises. All rights reserved."
+    }
+  },
+  "cms_reviews": []
+}
