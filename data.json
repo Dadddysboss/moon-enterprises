@@ -403,6 +403,12 @@
       "type": "pageview",
       "path": "/index.html",
       "label": "Moon Enterprises | Talent Portfolio",
+      "ts": "2026-09-02T01:39:30.412Z"
+    },
+    {
+      "type": "pageview",
+      "path": "/index.html",
+      "label": "Moon Enterprises | Talent Portfolio",
       "ts": "2026-09-02T01:39:22.577Z"
     },
     {
