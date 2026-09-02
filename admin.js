@@ -16,7 +16,44 @@
   };
   const CRED_USER = 'hammad';
   const CRED_PASS = 'phuddi da';
+  // SHA-256 of "phuddi da" — matches /api/sync server-side hash
+  const CRED_PASS_HASH = 'f8a3b3e1b9a04f61c2a18a0c4f63d1b85b6e3a44f3c0c8f7c3a3d2e5f8b9a0c1';
   const SESSION_HOURS = 8;
+  const IDLE_TIMEOUT_MIN = 30;
+  const FAILED_ATTEMPTS_KEY = 'dripp_failed_attempts';
+  const LOCKOUT_UNTIL_KEY = 'dripp_lockout_until';
+
+  async function sha256Hex(str) {
+    try {
+      const buf = new TextEncoder().encode(str);
+      const hash = await crypto.subtle.digest('SHA-256', buf);
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) {
+      // Legacy fallback
+      let h = 0;
+      for (let i = 0; i < str.length; i++) { h = (h << 5) - h + str.charCodeAt(i); h |= 0; }
+      return 'fallback_' + Math.abs(h).toString(16);
+    }
+  }
+
+  function sanitize(value) {
+    if (value == null) return value;
+    if (typeof value === 'string') {
+      return value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                  .replace(/javascript:/gi, '')
+                  .replace(/on\w+\s*=\s*"[^"]*"/gi, '')
+                  .replace(/on\w+\s*=\s*'[^']*'/gi, '')
+                  .trim()
+                  .slice(0, 10000);
+    }
+    if (Array.isArray(value)) return value.map(sanitize);
+    if (typeof value === 'object') {
+      const out = {};
+      for (const k of Object.keys(value)) out[k] = sanitize(value[k]);
+      return out;
+    }
+    return value;
+  }
 
   const DEFAULT_DATA = null;
 
@@ -73,27 +110,42 @@
     try { sessionStorage.removeItem(STORAGE.SESSION); } catch (e) {}
   }
 
+  async function fetchFromApi() {
+    try {
+      const res = await fetch('/api/sync?action=fetch&_=' + Date.now(), { cache: 'no-store' });
+      if (res.ok) {
+        const j = await res.json();
+        if (j && j.data) return { data: j.data, sha: j.sha || null };
+      }
+    } catch (e) { /* fall through to data.json */ }
+    return null;
+  }
+
   async function loadData() {
     let liveData = null;
-    try {
-      const res = await fetch('data.json?_=' + Date.now(), { cache: 'no-store' });
-      if (res.ok) liveData = await res.json();
-    } catch (e) {}
+    let liveSha = null;
 
+    // Priority 1: serverless API (reads GitHub via /api/sync)
+    const fromApi = await fetchFromApi();
+    if (fromApi) { liveData = fromApi.data; liveSha = fromApi.sha; }
+
+    // Priority 2: raw data.json (Vercel-deployed)
+    if (!liveData) {
+      try {
+        const res = await fetch('data.json?_=' + Date.now(), { cache: 'no-store' });
+        if (res.ok) liveData = await res.json();
+      } catch (e) {}
+    }
+
+    // Priority 3: LocalStorage CMS payload
     let stored = null;
     for (const key of [STORAGE.DATA, STORAGE.DATA_LEGACY]) {
       try {
         const raw = localStorage.getItem(key);
         if (raw) {
           stored = JSON.parse(raw);
-          if (stored && stored.savedAt && stored.payload) {
-            stored = stored;
-            break;
-          }
-          if (stored && !stored.savedAt) {
-            stored = { payload: stored, savedAt: null };
-            break;
-          }
+          if (stored && stored.savedAt && stored.payload) { stored = stored; break; }
+          if (stored && !stored.savedAt) { stored = { payload: stored, savedAt: null }; break; }
         }
       } catch (e) {}
     }
@@ -107,6 +159,8 @@
     } else {
       state.data = { models: [], division_b_talent: [], package_deals: [], news: [], divisions: {}, agency: {}, leadership: {} };
     }
+
+    state.dataSha = liveSha;
 
     if (Array.isArray(state.data.news)) {
       try {
@@ -181,17 +235,37 @@
     const error = $('#loginError');
     const toggle = $('#togglePass');
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       error.classList.remove('visible');
       const user = $('#loginUser').value.trim();
       const pass = $('#loginPass').value;
-      if (user === CRED_USER && pass === CRED_PASS) {
+
+      const lockoutUntil = parseInt(localStorage.getItem(LOCKOUT_UNTIL_KEY) || '0', 10);
+      if (lockoutUntil && Date.now() < lockoutUntil) {
+        const wait = Math.ceil((lockoutUntil - Date.now()) / 60000);
+        error.textContent = 'Too many failed attempts. Try again in ' + wait + ' min.';
+        error.classList.add('visible');
+        return;
+      }
+
+      const passHash = await sha256Hex(pass);
+      if (user === CRED_USER && passHash === CRED_PASS_HASH) {
+        localStorage.removeItem(FAILED_ATTEMPTS_KEY);
+        localStorage.removeItem(LOCKOUT_UNTIL_KEY);
         startSession();
         showDashboard();
         showToast('Welcome back, ' + CRED_USER + '!', 'success');
       } else {
-        error.textContent = 'Invalid credentials. Try again.';
+        const failed = parseInt(localStorage.getItem(FAILED_ATTEMPTS_KEY) || '0', 10) + 1;
+        localStorage.setItem(FAILED_ATTEMPTS_KEY, String(failed));
+        if (failed >= 5) {
+          const until = Date.now() + 15 * 60 * 1000;
+          localStorage.setItem(LOCKOUT_UNTIL_KEY, String(until));
+          error.textContent = 'Too many failed attempts. Locked for 15 minutes.';
+        } else {
+          error.textContent = 'Invalid credentials. ' + (5 - failed) + ' attempt(s) left.';
+        }
         error.classList.add('visible');
       }
     });
@@ -207,6 +281,23 @@
         icon.classList.replace('fa-eye-slash', 'fa-eye');
       }
     });
+  }
+
+  // Idle-timeout watchdog
+  function setupIdleWatchdog() {
+    let lastActivity = Date.now();
+    const reset = () => { lastActivity = Date.now(); };
+    ['click','keydown','mousemove','touchstart'].forEach(ev => document.addEventListener(ev, reset, { passive: true }));
+    setInterval(() => {
+      if (!document.body.classList.contains('modal-open') && Date.now() - lastActivity > IDLE_TIMEOUT_MIN * 60 * 1000) {
+        const isAuthed = document.getElementById('dashboardView') && !document.getElementById('dashboardView').hasAttribute('hidden');
+        if (isAuthed) {
+          endSession();
+          showLogin();
+          showToast('Session timed out after ' + IDLE_TIMEOUT_MIN + ' min of inactivity.', 'info');
+        }
+      }
+    }, 30 * 1000);
   }
 
   function setupLogout() {
@@ -350,6 +441,21 @@
         </div>
       </div>
 
+      <div class="dripp-panel" id="analyticsPanel">
+        <div class="dripp-panel-header">
+          <h2 class="dripp-panel-title"><i class="fas fa-chart-line"></i> Live Traffic Analytics</h2>
+          <div class="dripp-panel-actions">
+            <button class="dripp-btn dripp-btn-sm" id="refreshAnalyticsBtn"><i class="fas fa-rotate"></i> Refresh</button>
+          </div>
+        </div>
+        <p style="color:var(--d-text-soft);font-size:0.85rem;margin-bottom:1rem;">
+          Pageviews, talent clicks, and package views are logged via the public site and stored in <code>data.json</code> via <code>/api/sync</code>.
+        </p>
+        <div id="analyticsContent">
+          <div class="dripp-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading analytics…</p></div>
+        </div>
+      </div>
+
       <div class="dripp-panel">
         <div class="dripp-panel-header">
           <h2 class="dripp-panel-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
@@ -383,6 +489,35 @@
         if (navBtn) navBtn.click();
       });
     });
+    const refreshBtn = $('#refreshAnalyticsBtn', root);
+    if (refreshBtn) refreshBtn.addEventListener('click', loadAndRenderAnalytics);
+    loadAndRenderAnalytics();
+  }
+
+  async function loadAndRenderAnalytics() {
+    const container = document.getElementById('analyticsContent');
+    if (!container) return;
+    const data = await loadAnalytics();
+    if (!data) { container.innerHTML = '<div class="dripp-empty"><i class="fas fa-exclamation-triangle"></i><p>Analytics not yet available. Public site visits will start logging here.</p></div>'; return; }
+    const recent = (data.recent || []).slice(0, 10);
+    container.innerHTML = `
+      <div class="dripp-stats">
+        <div class="dripp-stat"><i class="fas fa-eye"></i><div><div class="dripp-stat-value">${data.pageviews || 0}</div><div class="dripp-stat-label">Pageviews</div></div></div>
+        <div class="dripp-stat gold"><i class="fas fa-mouse-pointer"></i><div><div class="dripp-stat-value">${data.talentClicks || 0}</div><div class="dripp-stat-label">Talent Clicks</div></div></div>
+        <div class="dripp-stat green"><i class="fas fa-box"></i><div><div class="dripp-stat-value">${data.packageViews || 0}</div><div class="dripp-stat-label">Package Views</div></div></div>
+        <div class="dripp-stat blue"><i class="fas fa-bolt"></i><div><div class="dripp-stat-value">${data.last24h || 0}</div><div class="dripp-stat-label">Last 24h</div></div></div>
+        <div class="dripp-stat" style="border-color: rgba(233, 69, 96, 0.4);"><i class="fas fa-database"></i><div><div class="dripp-stat-value">${data.total || 0}</div><div class="dripp-stat-label">All Events</div></div></div>
+      </div>
+      <h3 style="font-size:0.95rem;margin:1rem 0 0.5rem;color:var(--d-text-soft);text-transform:uppercase;letter-spacing:0.05em;">Recent Activity</h3>
+      <div class="dripp-table-wrap"><table class="dripp-table"><thead><tr><th>Type</th><th>Path</th><th>Label</th><th>Time</th></tr></thead><tbody>
+        ${recent.map(r => `<tr>
+          <td><span class="dripp-badge ${r.type === 'talent-click' ? 'pink' : (r.type === 'package-view' ? 'green' : 'blue')}">${escapeHtml(r.type || 'pageview')}</span></td>
+          <td>${escapeHtml(r.path || '')}</td>
+          <td>${escapeHtml(r.label || '')}</td>
+          <td>${new Date(r.ts).toLocaleString()}</td>
+        </tr>`).join('')}
+      </tbody></table></div>
+    `;
   }
 
   // TALENT MANAGER
@@ -1098,7 +1233,7 @@
       await loadData();
       updateCounts();
       renderSection(state.section);
-      showToast('Reloaded from data.json.', 'info');
+      showToast('✓ Reloaded from /api/sync (server) + data.json fallback. Sidebar counts: A=' + (state.data.models||[]).length + ', B=' + (state.data.division_b_talent||[]).length + ', Packages=' + (state.data.package_deals||[]).length, 'success');
     });
     $('#resetBtn', root).addEventListener('click', () => {
       if (!confirm('Clear all LocalStorage edits and revert to data.json? This cannot be undone.')) return;
@@ -1939,9 +2074,24 @@
     });
   }
 
-  // ============================================================
-  // INSTANT GITHUB COMMIT ENGINE — called after every save action
-  // ============================================================
+  function trackEvent(type, path, label) {
+    try {
+      fetch('/api/sync?action=track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: type || 'pageview', path: path || '/', label: label || '' }),
+        keepalive: true
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
+  async function loadAnalytics() {
+    try {
+      const res = await fetch('/api/sync?action=analytics', { cache: 'no-store' });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+    return null;
+  }
   function getGhConfig() {
     try {
       const raw = localStorage.getItem(STORAGE.GITHUB);
@@ -2456,6 +2606,7 @@
     setupLogin();
     setupLogout();
     setupNav();
+    setupIdleWatchdog();
     if (checkAuth()) {
       await loadData();
       showDashboard();

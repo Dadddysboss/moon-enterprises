@@ -11,6 +11,17 @@
   const REVIEWS_KEY = 'dripp_cms_reviews';
   const PENDING_REVIEWS_KEY = 'dripp_cms_pending_reviews';
 
+  function trackEvent(type, path, label) {
+    try {
+      fetch('/api/sync?action=track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: type || 'pageview', path: path || (typeof location !== 'undefined' ? location.pathname : '/'), label: label || '' }),
+        keepalive: true
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
   const I18N_STRINGS = {
     en: {
       brandName: 'Moon Enterprises',
@@ -500,10 +511,11 @@
     content.append(name, specialty, pricing, btn);
     card.append(imgWrapper, content);
 
-    card.addEventListener('click', () => openModelModal(model, divisionKey));
+    card.addEventListener('click', () => { trackEvent('talent-click', '#' + (divisionKey === 'ali_hamza' ? 'division-b' : 'models'), model.name); openModelModal(model, divisionKey); });
     card.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
+        trackEvent('talent-click', '#' + (divisionKey === 'ali_hamza' ? 'division-b' : 'models'), model.name);
         openModelModal(model, divisionKey);
       }
     });
@@ -648,10 +660,11 @@
 
     card.appendChild(body);
 
-    card.addEventListener('click', () => handlePackageInquiry(deal));
+    card.addEventListener('click', () => { trackEvent('package-view', '#packages', deal.title); handlePackageInquiry(deal); });
     card.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
+        trackEvent('package-view', '#packages', deal.title);
         handlePackageInquiry(deal);
       }
     });
@@ -1637,6 +1650,7 @@
     setupReviewForm('reviewFormB', 'reviewFormBStatus', 'division_b');
     setupCmsSync();
     applyLanguage();
+    trackEvent('pageview', location.pathname, document.title);
 
     fetchData()
       .then(() => {
