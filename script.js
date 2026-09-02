@@ -511,11 +511,16 @@
     content.append(name, specialty, pricing, btn);
     card.append(imgWrapper, content);
 
-    card.addEventListener('click', () => { trackEvent('talent-click', '#' + (divisionKey === 'ali_hamza' ? 'division-b' : 'models'), model.name); openModelModal(model, divisionKey); });
+    card.addEventListener('click', () => {
+      trackEvent('talent-click', '#' + (divisionKey === 'ali_hamza' ? 'division-b' : 'models'), model.name);
+      recordTalentView(model, divisionKey);
+      openModelModal(model, divisionKey);
+    });
     card.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         trackEvent('talent-click', '#' + (divisionKey === 'ali_hamza' ? 'division-b' : 'models'), model.name);
+        recordTalentView(model, divisionKey);
         openModelModal(model, divisionKey);
       }
     });
@@ -996,6 +1001,73 @@
     } catch (e) { console.warn('Could not save booking:', e); }
   }
 
+  // Auto-record a talent view in the admin's bookings log.
+  // Triggered when a visitor clicks on a model card.
+  function recordTalentView(model, divisionKey) {
+    try {
+      const list = getBookings();
+      const view = {
+        id: 'view_' + Date.now(),
+        type: 'talent-view',
+        clientName: '(visitor view)',
+        clientPhone: '',
+        modelName: model.name,
+        modelId: model.id,
+        division: divisionKey,
+        eventDate: '',
+        eventTime: '',
+        notes: 'Auto-logged on card click',
+        status: 'Viewed',
+        createdAt: new Date().toISOString()
+      };
+      list.unshift(view);
+      // cap at 200 entries
+      if (list.length > 200) list.length = 200;
+      localStorage.setItem(BOOKING_KEY, JSON.stringify(list));
+    } catch (e) { /* silent */ }
+  }
+
+  // Auto-create a sale record in the admin's POS terminal when a booking is confirmed.
+  // Triggered by the booking form submission (i.e. when the user clicks "Confirm & Open WhatsApp").
+  function recordSaleFromBooking(booking) {
+    try {
+      const SALES_KEY = 'dripp_cms_sales';
+      const raw = localStorage.getItem(SALES_KEY);
+      const list = raw ? JSON.parse(raw) : [];
+      // Avoid double-recording same booking (by booking id)
+      if (list.find(s => s.bookingId === booking.id)) return;
+      // Try to derive a default price from the model pricing
+      const allModels = (state.data && state.data.models) || [];
+      const allTalentB = (state.data && state.data.division_b_talent) || [];
+      const match = [...allModels, ...allTalentB].find(m => m.name === booking.modelName);
+      let amount = 0;
+      let currency = 'PKR';
+      if (match && match.pricing) {
+        const m = String(match.pricing).replace(/[^\d.]/g, '');
+        amount = parseFloat(m) || 0;
+      }
+      const sale = {
+        id: 'INV-' + String(list.length + 1).padStart(4, '0') + '-' + Date.now().toString().slice(-4),
+        bookingId: booking.id,
+        clientName: booking.clientName,
+        clientPhone: booking.clientPhone,
+        talentName: booking.modelName,
+        amount: amount,
+        currency: currency,
+        paymentMethod: 'Pending (WhatsApp)',
+        date: (booking.eventDate || new Date().toISOString().slice(0, 10)),
+        dateTime: (booking.eventDate && booking.eventTime) ? (booking.eventDate + 'T' + booking.eventTime) : new Date().toISOString().slice(0, 16),
+        division: booking.division,
+        status: 'Awaiting confirmation',
+        notes: booking.notes || 'Auto-created from WhatsApp booking flow',
+        createdAt: new Date().toISOString()
+      };
+      list.unshift(sale);
+      localStorage.setItem(SALES_KEY, JSON.stringify(list));
+      return sale;
+    } catch (e) { console.warn('Could not record sale:', e); return null; }
+  }
+
   let bookingCtx = null;
 
   function openBookingModal(ctx) {
@@ -1079,8 +1151,15 @@
         createdAt: new Date().toISOString()
       };
       saveBooking(booking);
+      const sale = recordSaleFromBooking(booking);
       closeBookingModal();
       openWhatsApp(number, message);
+      // Surface a small confirmation that a sale record was queued for the POS terminal
+      if (sale) {
+        try {
+          showToast('Booking recorded. POS sale draft created: ' + sale.id, 'success');
+        } catch (e) { /* noop */ }
+      }
     });
   }
 

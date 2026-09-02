@@ -342,7 +342,7 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'GET' && req.url.startsWith('/api/sync?action=analytics')) {
-    if (!authOk(req)) return res.status(401).json({ error: 'Unauthorized' });
+    // Public read — analytics are summary stats, not sensitive
     const cur = await readDataJson();
     if (!cur.data) return res.status(500).json({ error: 'fetch failed' });
     const events = Array.isArray(cur.data.analytics) ? cur.data.analytics : [];

@@ -417,6 +417,7 @@
       'reviews-mgr': 'Reviews & Comments',
       'contact': 'Contact Info',
       'site-content': 'Site Content (Hero/Footer)',
+      'leadership': 'Leadership Team',
       'github-sync': 'GitHub Auto-Sync',
       'settings': 'Settings'
     };
@@ -450,6 +451,7 @@
         case 'reviews-mgr': renderReviewsManager(content); break;
         case 'contact': renderContactManager(content); break;
         case 'site-content': renderSiteContentManager(content); break;
+        case 'leadership': renderLeadershipManager(content); break;
         case 'github-sync': renderGithubSync(content); break;
         case 'settings': renderSettings(content); break;
         default: content.innerHTML = '<div class="dripp-empty"><i class="fas fa-question"></i><p>Unknown section: ' + escapeHtml(section) + '</p></div>';
@@ -1004,53 +1006,148 @@
   // HERO
   function renderHeroManager(root) {
     const currentHero = state.heroImage || 'assets/images/hero-banner.jpg';
+    const allImages = listAssetImages();
     root.innerHTML = `
       <div class="dripp-panel">
         <div class="dripp-panel-header">
           <h2 class="dripp-panel-title"><i class="fas fa-image"></i> Hero & Banner</h2>
+          <div class="dripp-panel-actions">
+            <button class="dripp-btn" id="toggleLibBtn"><i class="fas fa-folder-open"></i> Toggle Image Library</button>
+          </div>
         </div>
-        <p style="color:var(--d-text-soft);margin-bottom:1rem;">Upload a new hero image or paste a path. The site uses <code>assets/images/hero-banner.jpg</code> by default. After saving here, replace the file in <code>assets/images/</code> to make the change permanent.</p>
+        <p style="color:var(--d-text-soft);margin-bottom:1rem;">Upload a new hero image, pick from the <code>assets/images/</code> library, or paste a path. The site uses <code>assets/images/hero-banner.jpg</code> by default.</p>
         <label class="dripp-upload" id="heroUpload">
           <i class="fas fa-cloud-upload-alt"></i>
           <p><strong>Click to upload</strong> or paste a path</p>
           <p style="font-size:0.75rem">Recommended: 600×750px portrait or larger</p>
           <input type="file" accept="image/*" id="heroFile">
-          <input type="text" id="heroPath" placeholder="or path: assets/images/hero-banner.jpg" value="${escapeHtml(state.heroImage || '')}" style="margin-top:0.5rem;width:100%;padding:0.5rem;background:var(--d-bg);border:1px solid var(--d-border);border-radius:6px;color:var(--d-text);">
         </label>
-        <img id="heroPreview" class="dripp-upload-preview visible" src="${escapeHtml(currentHero)}" alt="" style="max-width:300px;max-height:300px;">
+        <div style="margin-top:0.75rem;display:grid;grid-template-columns:1fr auto;gap:0.5rem;align-items:center;">
+          <input type="text" id="heroPath" placeholder="or path: assets/images/hero-banner.jpg" value="${escapeHtml(state.heroImage || '')}" style="padding:0.5rem 0.75rem;background:var(--d-bg);border:1px solid var(--d-border);border-radius:6px;color:var(--d-text);font-size:0.85rem;width:100%;">
+          <button type="button" class="dripp-btn dripp-btn-danger dripp-btn-sm" id="deleteHeroBtn" title="Clear hero image"><i class="fas fa-trash"></i> Delete</button>
+        </div>
+        <img id="heroPreview" class="dripp-upload-preview visible" src="${escapeHtml(currentHero)}" alt="" style="max-width:300px;max-height:300px;margin-top:1rem;">
         <div class="dripp-form-actions">
-          <button class="dripp-btn dripp-btn-danger" id="resetHeroBtn"><i class="fas fa-rotate-left"></i> Reset to default</button>
+          <button class="dripp-btn dripp-btn-ghost" id="resetHeroBtn"><i class="fas fa-rotate-left"></i> Reset to default</button>
           <button class="dripp-btn dripp-btn-primary" id="saveHeroBtn"><i class="fas fa-save"></i> Save Hero Image</button>
         </div>
+      </div>
+
+      <div class="dripp-panel" id="imageLibraryPanel" style="display:none;">
+        <div class="dripp-panel-header">
+          <h2 class="dripp-panel-title"><i class="fas fa-folder-open"></i> Image Library (<code>assets/images/</code>)</h2>
+          <div class="dripp-panel-actions">
+            <input type="text" id="imgLibSearch" placeholder="Search images…" style="padding:0.5rem 0.75rem;background:var(--d-bg);border:1px solid var(--d-border);border-radius:6px;color:var(--d-text);font-size:0.85rem;width:200px;">
+            <button class="dripp-btn dripp-btn-sm" id="refreshLibBtn"><i class="fas fa-rotate"></i> Refresh</button>
+          </div>
+        </div>
+        <p style="color:var(--d-text-soft);font-size:0.8rem;margin-bottom:1rem;">Click any image to use it as the hero/banner. Drag-and-drop reorder not supported in v1.</p>
+        <div class="dripp-image-grid" id="imageGrid"></div>
       </div>
     `;
     const preview = $('#heroPreview', root);
     const pathInput = $('#heroPath', root);
     const fileInput = $('#heroFile', root);
-    pathInput.addEventListener('input', () => preview.src = pathInput.value || 'assets/images/hero-banner.jpg');
+    let uploadedDataUrl = null;
     fileInput.addEventListener('change', () => {
       const f = fileInput.files[0];
       if (!f) return;
       const reader = new FileReader();
       reader.onload = e => {
         preview.src = e.target.result;
+        uploadedDataUrl = e.target.result;
         pathInput.value = '';
-        pathInput.dataset.upload = e.target.result;
+        pathInput.placeholder = '(uploaded — click Save to store as base64)';
       };
       reader.readAsDataURL(f);
     });
+    pathInput.addEventListener('input', () => {
+      uploadedDataUrl = null;
+      preview.src = pathInput.value || 'assets/images/hero-banner.jpg';
+      pathInput.placeholder = 'or path: assets/images/hero-banner.jpg';
+    });
     $('#saveHeroBtn', root).addEventListener('click', () => {
-      state.heroImage = pathInput.dataset.upload || pathInput.value || null;
+      const val = uploadedDataUrl || pathInput.value || null;
+      state.heroImage = val;
       saveHero();
-      showToast('Hero image saved. (Replace the file in assets/images/ to make it permanent.)', 'success');
+      commitAndToast('chore(cms): update hero image → ' + (val ? (val.startsWith('data:') ? 'base64-upload' : val) : 'default'));
+      showToast('Hero image saved. Pushing to GitHub…', 'success');
+    });
+    $('#deleteHeroBtn', root).addEventListener('click', () => {
+      if (!confirm('Delete the current hero image? (This clears the override; site will fall back to assets/images/hero-banner.jpg)')) return;
+      state.heroImage = null;
+      localStorage.removeItem(STORAGE.HERO);
+      localStorage.removeItem(STORAGE.HERO_LEGACY);
+      pathInput.value = '';
+      uploadedDataUrl = null;
+      preview.src = 'assets/images/hero-banner.jpg';
+      commitAndToast('chore(cms): delete hero image override');
+      showToast('Hero image deleted. Pushing to GitHub…', 'info');
     });
     $('#resetHeroBtn', root).addEventListener('click', () => {
       state.heroImage = null;
       localStorage.removeItem(STORAGE.HERO);
       localStorage.removeItem(STORAGE.HERO_LEGACY);
       pathInput.value = '';
+      uploadedDataUrl = null;
       preview.src = 'assets/images/hero-banner.jpg';
       showToast('Hero reset to default.', 'info');
+    });
+    $('#toggleLibBtn', root).addEventListener('click', () => {
+      const panel = $('#imageLibraryPanel', root);
+      panel.style.display = panel.style.display === 'none' ? '' : 'none';
+      if (panel.style.display !== 'none') renderImageGrid(panel, pathInput, preview);
+    });
+    $('#refreshLibBtn', root).addEventListener('click', () => {
+      renderImageGrid($('#imageLibraryPanel', root), pathInput, preview);
+    });
+    $('#imgLibSearch', root).addEventListener('input', () => {
+      renderImageGrid($('#imageLibraryPanel', root), pathInput, preview);
+    });
+  }
+
+  // Library of all images in assets/images/ (synced at build time via IMAGE_LIBRARY constant)
+  function listAssetImages() {
+    return (window.DRIPP_IMAGE_LIBRARY && Array.isArray(window.DRIPP_IMAGE_LIBRARY)) ? window.DRIPP_IMAGE_LIBRARY : [
+      'adan.jpg','aleesha.jpg','ali_hamza.png','ayesha.jpg','bushra.jpg','chanda.jpg','dani_daniels.jpg',
+      'hania.jpg','hero-banner.jpg','joiya_brand.jpg','kainat.jpg','kinza.jpg','malaika_a.svg','malaika.jpg',
+      'maqbool_moon_father.jpg','maria.jpg','mia_khalifa.jpg','mia_malkova.jpg','moon manager.jpeg','nadia.jpg',
+      'nimra.jpg','peeno.jpg','urwa.jpg'
+    ];
+  }
+
+  function renderImageGrid(panel, pathInput, preview) {
+    const grid = $('#imageGrid', panel);
+    if (!grid) return;
+    const all = listAssetImages();
+    const q = ($('#imgLibSearch', panel).value || '').toLowerCase();
+    const filtered = all.filter(p => !q || p.toLowerCase().includes(q));
+    grid.innerHTML = filtered.map(p => {
+      const fullPath = 'assets/images/' + p;
+      return `
+        <div class="dripp-image-cell" data-path="${escapeHtml(fullPath)}" title="${escapeHtml(p)}">
+          <img src="${escapeHtml(fullPath)}" alt="${escapeHtml(p)}" onerror="this.onerror=null;this.style.display='none'">
+          <div class="dripp-image-name">${escapeHtml(p)}</div>
+          <div class="dripp-image-actions">
+            <button type="button" class="dripp-btn dripp-btn-sm" data-use><i class="fas fa-check"></i> Use</button>
+          </div>
+        </div>
+      `;
+    }).join('') || '<div class="dripp-empty"><i class="fas fa-image"></i><p>No matching images.</p></div>';
+    $$('.dripp-image-cell', grid).forEach(cell => {
+      const p = cell.dataset.path;
+      cell.addEventListener('click', (e) => {
+        if (e.target.closest('button[data-use]')) return;
+        if (pathInput) { pathInput.value = p; }
+        if (preview) { preview.src = p; }
+      });
+      const btn = $('button[data-use]', cell);
+      if (btn) btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (pathInput) { pathInput.value = p; }
+        if (preview) { preview.src = p; }
+        showToast('Selected ' + p, 'info');
+      });
     });
   }
 
@@ -1611,6 +1708,167 @@
     });
   }
 
+  // LEADERSHIP TEAM MANAGER
+  function renderLeadershipManager(root) {
+    if (!state.data.leadership || typeof state.data.leadership !== 'object') state.data.leadership = {};
+    if (!state.data.division_b_leadership || typeof state.data.division_b_leadership !== 'object') state.data.division_b_leadership = {};
+    const ceo = state.data.leadership.ceo || { name: '', title: '', age: '', gender: '', occupation: '', pricing: '', image: '' };
+    const manager = state.data.leadership.manager || { name: '', title: '', age: '', gender: '', occupation: '', pricing: '', phone: '', serviceStaffCount: '', image: '' };
+    const divB = state.data.division_b_leadership.manager || { name: '', title: '', age: '', gender: '', occupation: '', pricing: '', phone: '', whatsappNumber: '', image: '' };
+    const allImages = listAssetImages();
+    const renderMember = (m, prefix, title) => `
+      <div class="dripp-panel">
+        <div class="dripp-panel-header">
+          <h2 class="dripp-panel-title"><i class="fas fa-user-tie"></i> ${escapeHtml(title)}</h2>
+        </div>
+        <form id="form-${prefix}" class="dripp-form-grid" autocomplete="off">
+          <label class="dripp-field"><span>Name *</span>
+            <div class="dripp-input-wrap"><i class="fas fa-user"></i><input type="text" name="name" required value="${escapeHtml(m.name || '')}"></div>
+          </label>
+          <label class="dripp-field"><span>Title (English / Urdu)</span>
+            <div class="dripp-input-wrap"><i class="fas fa-id-badge"></i><input type="text" name="title" value="${escapeHtml(m.title || '')}" placeholder="EN / اردو"></div>
+          </label>
+          <label class="dripp-field"><span>Age</span>
+            <div class="dripp-input-wrap"><i class="fas fa-birthday-cake"></i><input type="number" min="0" name="age" value="${escapeHtml(m.age || '')}"></div>
+          </label>
+          <label class="dripp-field"><span>Gender (EN / اردو)</span>
+            <div class="dripp-input-wrap"><i class="fas fa-venus-mars"></i><input type="text" name="gender" value="${escapeHtml(m.gender || '')}"></div>
+          </label>
+          <label class="dripp-field dripp-form-full"><span>Occupation (EN / اردو)</span>
+            <div class="dripp-input-wrap"><i class="fas fa-briefcase"></i><input type="text" name="occupation" value="${escapeHtml(m.occupation || '')}"></div>
+          </label>
+          <label class="dripp-field dripp-form-full"><span>Pricing (EN / اردو)</span>
+            <div class="dripp-input-wrap"><i class="fas fa-tag"></i><input type="text" name="pricing" value="${escapeHtml(m.pricing || '')}"></div>
+          </label>
+          ${prefix !== 'ceo' ? `
+            <label class="dripp-field"><span>Phone</span>
+              <div class="dripp-input-wrap"><i class="fas fa-phone"></i><input type="text" name="phone" value="${escapeHtml(m.phone || '')}"></div>
+            </label>
+          ` : ''}
+          ${prefix === 'manager' ? `
+            <label class="dripp-field"><span>Service Staff Count</span>
+              <div class="dripp-input-wrap"><i class="fas fa-users"></i><input type="number" min="0" name="serviceStaffCount" value="${escapeHtml(m.serviceStaffCount || '')}"></div>
+            </label>
+          ` : ''}
+          ${prefix === 'divb' ? `
+            <label class="dripp-field"><span>WhatsApp Number</span>
+              <div class="dripp-input-wrap"><i class="fab fa-whatsapp"></i><input type="text" name="whatsappNumber" value="${escapeHtml(m.whatsappNumber || '')}" placeholder="923147553161"></div>
+            </label>
+          ` : ''}
+          <label class="dripp-field dripp-form-full"><span>Image (path or upload)</span>
+            <div class="dripp-input-wrap"><i class="fas fa-image"></i><input type="text" name="image" value="${escapeHtml(m.image || '')}" placeholder="assets/images/photo.jpg"></div>
+          </label>
+          <div class="dripp-form-full">
+            <input type="file" accept="image/*" id="file-${prefix}" data-prefix="${prefix}">
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;align-items:center;">
+              <button type="button" class="dripp-btn dripp-btn-sm" data-pick-image="${prefix}"><i class="fas fa-folder-open"></i> Pick from library</button>
+              <button type="button" class="dripp-btn dripp-btn-sm dripp-btn-danger" data-clear-image="${prefix}"><i class="fas fa-trash"></i> Clear image</button>
+            </div>
+            <div id="lib-${prefix}" class="dripp-image-grid" style="display:none;margin-top:0.5rem;"></div>
+            <img id="preview-${prefix}" src="${escapeHtml(m.image || '')}" alt="" style="max-width:160px;max-height:160px;margin-top:0.5rem;${m.image ? '' : 'display:none;'}">
+          </div>
+        </form>
+        <div class="dripp-form-actions">
+          <button class="dripp-btn dripp-btn-primary" data-save-leadership="${prefix}"><i class="fas fa-save"></i> Save ${escapeHtml(title)}</button>
+        </div>
+      </div>
+    `;
+    root.innerHTML = `
+      <div class="dripp-panel">
+        <div class="dripp-panel-header">
+          <h2 class="dripp-panel-title"><i class="fas fa-user-tie"></i> Leadership Team</h2>
+        </div>
+        <p style="color:var(--d-text-soft);line-height:1.6;">
+          Edit every field of the CEO, Operations Manager, and Division B head. Images can be uploaded (Base64 stored in <code>data.json</code>), picked from the <code>assets/images/</code> library, or referenced by path. All changes are pushed to GitHub.
+        </p>
+      </div>
+      ${renderMember(ceo, 'ceo', 'CEO (Division A — Maqbool / Phuddi da)')}
+      ${renderMember(manager, 'manager', 'Operations Manager (Moon / Muni)')}
+      ${renderMember(divB, 'divb', 'Division B Head (Ali Hamza)')}
+    `;
+    // Save handlers
+    const collect = (prefix) => {
+      const form = $('#form-' + prefix, root);
+      if (!form) return null;
+      const fd = new FormData(form);
+      const out = {};
+      for (const [k, v] of fd.entries()) out[k] = String(v).trim();
+      return out;
+    };
+    const saveOne = (prefix) => {
+      const data = collect(prefix);
+      if (!data) return;
+      if (!data.name) { showToast('Name is required.', 'error'); return; }
+      if (prefix === 'ceo') {
+        state.data.leadership.ceo = Object.assign({}, state.data.leadership.ceo || {}, data);
+      } else if (prefix === 'manager') {
+        state.data.leadership.manager = Object.assign({}, state.data.leadership.manager || {}, data);
+      } else if (prefix === 'divb') {
+        if (!state.data.division_b_leadership) state.data.division_b_leadership = {};
+        state.data.division_b_leadership.manager = Object.assign({}, state.data.division_b_leadership.manager || {}, data);
+      }
+      saveData();
+      commitAndToast('chore(cms): update leadership → ' + (data.name || prefix));
+      showToast('Leadership saved. Pushing to GitHub…', 'success');
+    };
+    $$('[data-save-leadership]', root).forEach(btn => btn.addEventListener('click', () => saveOne(btn.dataset.saveLeadership)));
+    // Image library picker per member
+    const wireImagePicker = (prefix) => {
+      const lib = $('#lib-' + prefix, root);
+      const pickBtn = $('[data-pick-image="' + prefix + '"]', root);
+      const clearBtn = $('[data-clear-image="' + prefix + '"]', root);
+      const preview = $('#preview-' + prefix, root);
+      const pathInput = $('#form-' + prefix + ' [name="image"]', root);
+      const fileInput = $('#file-' + prefix, root);
+      let uploadedDataUrl = null;
+      fileInput.addEventListener('change', () => {
+        const f = fileInput.files[0];
+        if (!f) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          uploadedDataUrl = e.target.result;
+          pathInput.value = '';
+          preview.src = e.target.result;
+          preview.style.display = '';
+        };
+        reader.readAsDataURL(f);
+      });
+      pathInput.addEventListener('input', () => {
+        uploadedDataUrl = null;
+        if (pathInput.value) { preview.src = pathInput.value; preview.style.display = ''; }
+        else { preview.style.display = 'none'; }
+      });
+      clearBtn.addEventListener('click', () => {
+        pathInput.value = '';
+        uploadedDataUrl = null;
+        preview.src = '';
+        preview.style.display = 'none';
+        if (fileInput) fileInput.value = '';
+        showToast('Image cleared (Save to apply).', 'info');
+      });
+      pickBtn.addEventListener('click', () => {
+        if (lib.style.display !== 'none') { lib.style.display = 'none'; return; }
+        lib.style.display = '';
+        lib.innerHTML = allImages.map(p => {
+          const full = 'assets/images/' + p;
+          return `<div class="dripp-image-cell" data-pick="${escapeHtml(full)}"><img src="${escapeHtml(full)}" onerror="this.onerror=null;this.style.display='none'"><div class="dripp-image-name">${escapeHtml(p)}</div></div>`;
+        }).join('');
+        $$('[data-pick]', lib).forEach(cell => {
+          cell.addEventListener('click', () => {
+            const p = cell.dataset.pick;
+            pathInput.value = p;
+            preview.src = p;
+            preview.style.display = '';
+            uploadedDataUrl = null;
+            showToast('Selected ' + p, 'info');
+          });
+        });
+      });
+    };
+    ['ceo','manager','divb'].forEach(wireImagePicker);
+  }
+
+
   // REVIEWS & COMMENTS MANAGER
   function renderReviewsManager(root) {
     const all = readCmsReviews();
@@ -2142,9 +2400,60 @@
 
   async function loadAnalytics() {
     try {
-      const res = await fetch('/api/sync?action=analytics', { cache: 'no-store' });
+      // Try the serverless /api/sync analytics endpoint (which requires admin auth)
+      const cfg = getGhConfig();
+      const adminToken = sessionStorage.getItem(STORAGE.SESSION);
+      const headers = { 'Accept': 'application/json' };
+      // Pass the admin token in case it's a future cross-domain scenario
+      if (adminToken) headers['Authorization'] = 'Bearer ' + adminToken;
+      // First try admin-auth path (works on local dev too if a token is configured)
+      let res = await fetch('/api/sync?action=analytics', { cache: 'no-store', headers });
       if (res.ok) return await res.json();
-    } catch (e) {}
+      // Fall back to GitHub direct (more reliable for live data)
+      if (cfg && cfg.token && cfg.owner && cfg.repo) {
+        const apiBase = 'https://api.github.com/repos/' + cfg.owner + '/' + cfg.repo + '/contents/data.json?ref=' + encodeURIComponent(cfg.branch || 'main');
+        const ghRes = await fetch(apiBase, { headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json' } });
+        if (ghRes.ok) {
+          const j = await ghRes.json();
+          let decoded = '';
+          try { decoded = atob((j.content || '').replace(/\n/g, '')); } catch (e) { decoded = ''; }
+          try {
+            const data = JSON.parse(decoded);
+            const events = Array.isArray(data.analytics) ? data.analytics : [];
+            const now = Date.now();
+            const last24h = events.filter(e => now - new Date(e.ts).getTime() < 24 * 60 * 60 * 1000);
+            const pageviews = events.filter(e => e.type === 'pageview' || !e.type);
+            const talentClicks = events.filter(e => e.type === 'talent-click');
+            const pkgViews = events.filter(e => e.type === 'package-view');
+            return {
+              total: events.length,
+              last24h: last24h.length,
+              pageviews: pageviews.length,
+              talentClicks: talentClicks.length,
+              packageViews: pkgViews.length,
+              recent: events.slice(0, 50)
+            };
+          } catch (e) {}
+        }
+      }
+      // Final fallback: read from local state.data.analytics
+      const events = (state.data && Array.isArray(state.data.analytics)) ? state.data.analytics : [];
+      const now = Date.now();
+      const last24h = events.filter(e => now - new Date(e.ts).getTime() < 24 * 60 * 60 * 1000);
+      const pageviews = events.filter(e => e.type === 'pageview' || !e.type);
+      const talentClicks = events.filter(e => e.type === 'talent-click');
+      const pkgViews = events.filter(e => e.type === 'package-view');
+      if (events.length > 0) {
+        return {
+          total: events.length,
+          last24h: last24h.length,
+          pageviews: pageviews.length,
+          talentClicks: talentClicks.length,
+          packageViews: pkgViews.length,
+          recent: events.slice(0, 50)
+        };
+      }
+    } catch (e) { console.warn('loadAnalytics failed:', e); }
     return null;
   }
   function getGhConfig() {
@@ -2380,11 +2689,17 @@
                     <td><strong>${escapeHtml(s.clientName || '—')}</strong></td>
                     <td>${escapeHtml(s.clientPhone || '—')}</td>
                     <td>${escapeHtml(s.talentName || '—')}</td>
-                    <td><strong>PKR ${parsePKR(s.amount).toLocaleString()}</strong></td>
-                    <td>${escapeHtml(s.paymentMethod || '—')}</td>
+                    <td><input type="text" data-pos-amount="${i}" value="${parsePKR(s.amount)}" style="padding:0.2rem 0.3rem;font-size:0.75rem;background:var(--d-bg);border:1px solid var(--d-border);border-radius:4px;width:90px;" inputmode="decimal" placeholder="5000"></td>
+                    <td><input type="text" data-pos-method="${i}" value="${escapeHtml(s.paymentMethod || '—')}" style="padding:0.2rem 0.3rem;font-size:0.75rem;background:var(--d-bg);border:1px solid var(--d-border);border-radius:4px;width:100%;min-width:90px;" placeholder="Cash"></td>
+                    <td>
+                      <select data-pos-status="${i}" class="dripp-input" style="padding:0.2rem 0.3rem;font-size:0.75rem;background:var(--d-bg);border:1px solid var(--d-border);border-radius:4px;color:var(--d-text);">
+                        ${['Awaiting confirmation','Pending','Paid','Cancelled','Refunded'].map(st => `<option value="${st}" ${(s.status || 'Awaiting confirmation') === st ? 'selected' : ''}>${st}</option>`).join('')}
+                      </select>
+                    </td>
                     <td class="dripp-actions-cell">
                       <button class="dripp-btn dripp-btn-sm" data-pos-receipt="${i}" title="Print Receipt"><i class="fas fa-print"></i></button>
                       <button class="dripp-btn dripp-btn-sm dripp-btn-danger" data-pos-delete="${i}" title="Delete"><i class="fas fa-trash"></i></button>
+                      <button class="dripp-btn dripp-btn-sm" data-pos-save="${i}" title="Save edits"><i class="fas fa-save"></i></button>
                     </td>
                   </tr>
                 `).join('')}
@@ -2467,6 +2782,28 @@
       updateCounts();
       renderPos(root);
       showToast('Sale deleted.', 'info');
+    }));
+    $$('[data-pos-save]', root).forEach(b => b.addEventListener('click', () => {
+      const i = parseInt(b.dataset.posSave, 10);
+      const list = readSales();
+      const sale = list[i];
+      if (!sale) return;
+      const amtEl = $('[data-pos-amount="' + i + '"]', root);
+      const metEl = $('[data-pos-method="' + i + '"]', root);
+      const statEl = $('[data-pos-status="' + i + '"]', root);
+      const newAmount = parsePKR(amtEl ? amtEl.value : sale.amount);
+      const newMethod = (metEl && metEl.value) ? metEl.value.trim() : sale.paymentMethod;
+      const newStatus = (statEl && statEl.value) ? statEl.value : (sale.status || 'Awaiting confirmation');
+      if (newAmount === sale.amount && newMethod === sale.paymentMethod && newStatus === sale.status) {
+        showToast('No changes to save.', 'info'); return;
+      }
+      list[i] = Object.assign({}, sale, { amount: newAmount, paymentMethod: newMethod, status: newStatus, updatedAt: new Date().toISOString() });
+      persistSales(list);
+      saveData();
+      commitAndToast('chore(pos): update sale ' + sale.id + ' → ' + newStatus);
+      updateCounts();
+      renderPos(root);
+      showToast('Sale updated. Pushing to GitHub…', 'success');
     }));
 
     const exp = $('#exportSalesCsvBtn', root);
