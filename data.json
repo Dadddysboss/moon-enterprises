@@ -401,6 +401,12 @@
   "analytics": [
     {
       "type": "pageview",
+      "path": "/index.html",
+      "label": "Moon Enterprises | Talent Portfolio",
+      "ts": "2026-09-02T01:30:42.457Z"
+    },
+    {
+      "type": "pageview",
       "path": "/",
       "label": "",
       "ts": "2026-09-02T01:10:51.532Z"
