@@ -1,10 +1,11 @@
 {
   "version": 2,
   "name": "moon-enterprises",
-  "builds": [
-    { "src": "api/**", "use": "@vercel/node" },
-    { "src": "**/*", "use": "@vercel/static" }
-  ],
+  "functions": {
+    "api/**/*.js": {
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/news", "destination": "/news.html" }
